@@ -4,13 +4,12 @@ import { SpawnPanel } from './spawn';
 import type { UiComponent, UiContext } from './context';
 import { h, iconButton, setAttr, setHidden, setText, setTitle, setVariant } from './dom';
 import { formatDuration, formatInt } from './format';
-import { FALLBACK_MARK, ICONS } from './icons';
+import { ICONS } from './icons';
 import { computeCounters, shellLine, shellWaitIn, shellWaitingAgents, waitingAgents, type Counters } from './model';
 import { TIMELAPSE_ICONS } from './timelapse';
 import { focusPermission, nextPermissionAgent, permissionAgents } from './permission';
 import { UsageCards } from './usage';
 import { VersionChip } from './version';
-import { wordmark } from './widgets';
 import { tr } from '../../../shared/i18n';
 
 interface CounterRefs {
@@ -51,14 +50,6 @@ export class TopBar implements UiComponent {
   readonly panelGroup: HTMLElement;
 
   constructor(private ctx: UiContext) {
-    // Marca: usa o logo do projeto se existir; senão, o prédio em pixels.
-    const mark = h('span', { class: 'ui-brand__mark' });
-    const logo = h('img', { attrs: { src: '/assets/brand/logo-mark.png', srcset: '/assets/brand/logo-mark@4x.png 4x', alt: '', width: 32, height: 32, draggable: 'false' } });
-    logo.addEventListener('error', () => {
-      mark.innerHTML = FALLBACK_MARK;
-    });
-    mark.append(logo);
-
     this.pillText = h('span', { class: 'ui-pill__text' });
     this.pill = h('span', { class: 'ui-pill', role: 'status', attrs: { 'aria-live': 'polite' } }, h('span', { class: 'ui-pill__dot' }), this.pillText);
     this.demoBadge = h('span', { class: 'ui-demo-badge', text: tr('Demonstração'), title: tr('Agentes de demonstração ligados (desligue em Configurações)'), hidden: true });
@@ -137,8 +128,9 @@ export class TopBar implements UiComponent {
         h(
           'div',
           { class: 'ui-brand' },
-          mark,
-          h('div', { class: 'ui-brand__text' }, wordmark(), h('div', { class: 'ui-topbar__status' }, this.pill, this.version.el, this.demoBadge)),
+          // Fork NovaK: o lockup oficial do Grupo NovaK no lugar do prédio e do logotipo em pixels (theme-novak.css).
+          h('span', { class: 'ui-brand__lockup', role: 'img', attrs: { 'aria-label': tr('Habblaud · Grupo NovaK') } }),
+          h('div', { class: 'ui-brand__text' }, h('div', { class: 'ui-topbar__status' }, this.pill, this.version.el, this.demoBadge)),
         ),
       ),
       counterWrap,

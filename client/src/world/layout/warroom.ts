@@ -10,8 +10,9 @@ export const LIBRARY_ID = 'core:biblioteca';
 const COL = 2;
 
 export const WARROOM_WALLS = {
-  warroom: { base: '#3a3f4f', trim: '#b08d4a', pattern: 'wood_panel' } satisfies WallStyle,
-  library: { base: '#e6dbc4', trim: '#7d5c3c', pattern: 'wood_panel' } satisfies WallStyle,
+  // identidade do Grupo NovaK: marfim e mármore com acabamento em ouro; o violeta fica no tapete da mesa
+  warroom: { base: '#f3eee6', trim: '#c6a45b', pattern: 'marble' } satisfies WallStyle,
+  library: { base: '#efe7d8', trim: '#a88b4a', pattern: 'wood_panel' } satisfies WallStyle,
 };
 
 /** Primeira e última coluna local da mesa do conselho (3 mesas de reunião de 3 tiles lado a lado). */
@@ -21,9 +22,10 @@ const TABLE_X1 = 11;
 export function layoutWarRoom(): AreaLayout {
   const b = new AreaBuilder(WARROOM_ID, 'warroom', { x: COL * COL_W, y: NORTH_Y, w: COL_W, h: ROOM_H });
   const wall = WARROOM_WALLS.warroom;
-  b.floor('wood', 0, 0, 16, 12, 701);
-  b.rug(2.2, 3.3, 10.6, 5.4, '#5b2531', 702);
-  b.rug(DOOR_X - 0.25, 9.5, DOOR_W + 0.5, 1.25, '#3b1820', 703);
+  b.floor('marble', 0, 0, 16, 12, 701);
+  b.rug(1.9, 3.0, 11.2, 6.0, '#c6a45b', 704);
+  b.rug(2.2, 3.3, 10.6, 5.4, '#5b24d6', 702);
+  b.rug(DOOR_X - 0.25, 9.5, DOOR_W + 0.5, 1.25, '#3d1a8f', 703);
   b.face(0.5, 15, wall);
   b.south(0.5, 15, 11, wall, [{ lx: DOOR_X, w: DOOR_W }]);
   b.cap(0, 0, 0.5, 12, wall);
@@ -78,8 +80,8 @@ export function layoutLibrary(): AreaLayout {
   const b = new AreaBuilder(LIBRARY_ID, 'library', { x: COL * COL_W, y: SOUTH_Y, w: COL_W, h: ROOM_H });
   const wall = WARROOM_WALLS.library;
   b.floor('wood', 0, 0, 16, 12, 801);
-  b.rug(2, 4.6, 6, 3.8, '#7a5536', 802);
-  b.rug(9.5, 4.6, 5, 3.8, '#3f5d4a', 803);
+  b.rug(2, 4.6, 6, 3.8, '#5b24d6', 802);
+  b.rug(9.5, 4.6, 5, 3.8, '#c6a45b', 803);
   b.face(0.5, 15, wall, [{ lx: DOOR_X, w: DOOR_W }]);
   b.wall('door_frame', DOOR_X + DOOR_W / 2, undefined, { order: 0.05 });
   b.south(0.5, 15, 11, { ...wall, exterior: true });

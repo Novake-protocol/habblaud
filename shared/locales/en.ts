@@ -2608,4 +2608,10 @@ export const EN: Readonly<Record<string, string>> = {
   "🏛️ {0} convocou o conselho: {1}": "🏛️ {0} convened the council: {1}",
   // server/dictation/whisper.ts (Windows)
   "whisper-cli (baixe o whisper.cpp para Windows e ponha no PATH, ou use HABBLAUD_WHISPER_BIN)": "whisper-cli (download whisper.cpp for Windows and put it on PATH, or use HABBLAUD_WHISPER_BIN)",
+  // fork NovaK: visual da interface (client/src/ui/theme.ts, settings.ts, topbar.ts)
+  "Visual da interface": "Interface look",
+  "Claro": "Light",
+  "Noite orbital": "Orbital night",
+  "Seguir o sistema": "Follow the system",
+  "Habblaud · Grupo NovaK": "Habblaud · NovaK Group",
 };

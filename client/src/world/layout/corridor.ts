@@ -8,7 +8,8 @@ export const CORRIDOR_ID = 'core:corredor';
 const TALL = ['ficus', 'palm', 'monstera', 'bonsai'] as const;
 const SMALL = ['fern', 'succulent', 'flower'] as const;
 /** Passadeira: uma família de cor só (azul-acinzentado discreto), com leve variação de tom. */
-const RUNNERS = ['#8b9bb0', '#8597ab', '#909fb3'] as const;
+// fork NovaK: passadeira violeta com variações leves (o ouro fica nas paredes e no tapete da War Room)
+const RUNNERS = ['#5b24d6', '#5420c8', '#6230dc'] as const;
 
 export function layoutCorridor(cols: number): AreaLayout {
   const w = cols * COL_W;

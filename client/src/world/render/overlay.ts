@@ -18,7 +18,8 @@ import { tr } from '../../../../shared/i18n';
 
 // A Pixelify Sans tem o "C" maiúsculo quase fechado (lê-se "Oopa" em vez de "Copa") em qualquer
 // peso/tamanho usado no canvas; os textos do mundo usam a fonte do sistema, sempre legível.
-const UI_FONT = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
+// Fork NovaK: Manrope (carregada pela UI; world/index.ts limpa os caches de texto quando as fontes chegam).
+const UI_FONT = 'Manrope, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
 const LABEL_FONT = `600 10.5px ${UI_FONT}`;
 const BUBBLE_FONT = `500 11.5px ${UI_FONT}`;
 const SAY_FONT = `500 10.5px ${UI_FONT}`;
@@ -419,7 +420,7 @@ export class Overlay {
       const anim = room ? buildAnim(room.phase, room.progress(now)) : null;
       // texto da placa quando ela fica grande o bastante para ler; senão, o nome flutuante
       const rect = this.renderer.signRect(vis);
-      const text = room ? room.info.name : vis.id === 'core:recepcao' ? 'Habblaud' : vis.id === 'core:warroom' ? 'War Room' : null;
+      const text = room ? room.info.name : vis.id === 'core:recepcao' ? 'NovaK' : vis.id === 'core:warroom' ? 'War Room' : null;
       const readable = !!rect && rect.h * zoom >= SIGN_MIN_PX;
       if (readable && rect && text && (!anim || anim.sign >= 1)) {
         const ax = this.sx(rect.x);
@@ -490,7 +491,7 @@ export class Overlay {
     const cy = Math.round(y + h / 2) + 0.5;
     ctx.fillStyle = dark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.45)';
     ctx.fillText(t, cx, cy + 1);
-    ctx.fillStyle = dark ? '#f5f1e6' : '#26303e';
+    ctx.fillStyle = dark ? '#fffdf8' : '#17132b';
     ctx.fillText(t, cx, cy);
     ctx.textAlign = 'left';
     // contas presentes: bolinhas na cor da conta, no canto da placa
@@ -536,11 +537,11 @@ export class Overlay {
     const y = Math.round(cy - h - 4);
     ctx.save();
     ctx.globalAlpha = lit ? 1 : 0.8;
-    ctx.fillStyle = 'rgba(16,20,32,0.28)';
+    ctx.fillStyle = 'rgba(23,19,43,0.28)';
     ctx.beginPath();
     ctx.roundRect(x, y + 2, w, h, 7);
     ctx.fill();
-    ctx.fillStyle = 'rgba(22,27,40,0.9)';
+    ctx.fillStyle = 'rgba(23,19,43,0.9)';
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 7);
     ctx.fill();
@@ -551,7 +552,7 @@ export class Overlay {
     let dx = x + 10;
     if (!compact) {
       ctx.font = ROOM_FONT;
-      ctx.fillStyle = '#f3f5fa';
+      ctx.fillStyle = '#fffdf8';
       ctx.fillText(text, x + 10, y + h / 2 + 1);
       dx = x + 10 + tw + 8;
     }
@@ -565,7 +566,7 @@ export class Overlay {
       ctx.roundRect(dx + 2, y + 4, cw - 4, h - 8, 5);
       ctx.fill();
       ctx.font = LABEL_FONT;
-      ctx.fillStyle = '#dfe5f2';
+      ctx.fillStyle = '#e9d29d';
       ctx.fillText(countText, dx + 7, y + h / 2 + 0.5);
     }
     ctx.restore();
@@ -583,12 +584,12 @@ export class Overlay {
     const h = 18;
     const x = Math.round(cx - w / 2);
     const y = Math.round(cy - h - 4);
-    ctx.fillStyle = 'rgba(22,27,40,0.62)';
+    ctx.fillStyle = 'rgba(23,19,43,0.66)';
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 6);
     ctx.fill();
     ctx.font = font;
-    ctx.fillStyle = '#e8ecf5';
+    ctx.fillStyle = '#fffdf8';
     ctx.fillText(text, x + 7, y + h / 2 + 1);
     this.place(x, y, w, h);
   }
@@ -733,9 +734,9 @@ export class Overlay {
     const { x, y, w, h } = b;
     const headX = this.sx(b.head.x);
     const tone = b.tone;
-    const bg = tone === 'alert' ? '#ffcf4a' : tone === 'deliver' ? '#e2f0ff' : tone === 'shell' ? '#1d2433' : tone === 'say' ? '#ffffff' : '#fffdf8';
-    const border = tone === 'alert' ? '#c58f10' : tone === 'deliver' ? '#7aa7d9' : tone === 'shell' ? '#4b5d7e' : tone === 'say' ? 'rgba(40,48,66,0.38)' : 'rgba(40,48,66,0.22)';
-    const fg = tone === 'alert' ? '#3b2a00' : tone === 'deliver' ? '#17324f' : tone === 'shell' ? '#b9f6b4' : tone === 'say' ? '#1d2330' : '#232a36';
+    const bg = tone === 'alert' ? '#ffcf4a' : tone === 'deliver' ? '#f1eafe' : tone === 'shell' ? '#1d2433' : tone === 'say' ? '#ffffff' : '#fffdf8';
+    const border = tone === 'alert' ? '#c58f10' : tone === 'deliver' ? '#5b24d6' : tone === 'shell' ? '#4b5d7e' : tone === 'say' ? 'rgba(168,139,74,0.75)' : 'rgba(168,139,74,0.55)';
+    const fg = tone === 'alert' ? '#3b2a00' : tone === 'deliver' ? '#2a1466' : tone === 'shell' ? '#b9f6b4' : tone === 'say' ? '#17132b' : '#17132b';
     const pulse = tone === 'alert' ? 1 + Math.sin(now / 160) * 0.035 : 1;
     ctx.save();
     ctx.globalAlpha = b.alpha;
@@ -756,7 +757,7 @@ export class Overlay {
     }
     const tailX = Math.max(x + 8, Math.min(x + w - 8, Math.round(headX)));
     // sombra
-    ctx.fillStyle = 'rgba(16,20,32,0.22)';
+    ctx.fillStyle = 'rgba(23,19,43,0.2)';
     ctx.beginPath();
     ctx.roundRect(x, y + 2, w, h, 7);
     ctx.fill();
@@ -908,7 +909,7 @@ export class Overlay {
     const { nameW, chipW, badgeW, codexW } = this.labelWidth(l);
     const { x, y, w, h } = l;
     const selected = sel.agent === ch.id;
-    ctx.fillStyle = selected ? 'rgba(18,96,140,0.95)' : ch.mode === 'wait' ? 'rgba(120,78,0,0.92)' : 'rgba(22,26,38,0.82)';
+    ctx.fillStyle = selected ? 'rgba(91,36,214,0.95)' : ch.mode === 'wait' ? 'rgba(120,78,0,0.92)' : 'rgba(23,19,43,0.84)';
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 7.5);
     ctx.fill();
@@ -941,11 +942,11 @@ export class Overlay {
       cx += chipW;
     }
     ctx.font = LABEL_FONT;
-    ctx.fillStyle = '#f5f7fb';
+    ctx.fillStyle = '#fffdf8';
     ctx.fillText(ch.info.name, cx + 1, y + h / 2 + 0.5);
     cx += nameW + 4;
     if (badgeW) {
-      ctx.fillStyle = ch.appearance.lanyard ?? '#f2b33d';
+      ctx.fillStyle = ch.appearance.lanyard ?? '#c6a45b';
       ctx.beginPath();
       ctx.roundRect(cx, y + 3, badgeW, h - 6, 4);
       ctx.fill();
@@ -955,7 +956,7 @@ export class Overlay {
       cx += badgeW + 3;
     } else if (sub) {
       // selo compacto: pontinho na cor do crachá
-      ctx.fillStyle = ch.appearance.lanyard ?? '#f2b33d';
+      ctx.fillStyle = ch.appearance.lanyard ?? '#c6a45b';
       ctx.beginPath();
       ctx.arc(x + w - 3, y + 3, 2.5, 0, Math.PI * 2);
       ctx.fill();
