@@ -175,6 +175,8 @@ export interface AgentInfo {
   custom?: true;
   /** Subagente rodando em segundo plano. */
   background?: boolean;
+  /** Subagente que é membro do conselho (/council): chave de shared/council.ts ("socrates"). Senta na War Room. */
+  council?: string;
   /**
    * Pedido de permissão que dá para responder pelo Habblaud (hook PermissionRequest; o mais antigo, se
    * houver vários). Enquanto existe, o agente aparece como 'waiting'. Ver PermissionRequestInfo.

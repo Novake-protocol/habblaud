@@ -31,6 +31,12 @@ export function layoutCorridor(cols: number): AreaLayout {
       const bench = b.furn('bench', x + 2, 0, undefined, { order: 0.5 });
       for (let i = 0; i < 2; i++) b.seat('bench', 'bench', x + 2 + i, 0, 'down', undefined, { noFurniture: true, furnitureId: bench });
       b.furn('plant_tall', x + 13, 0, 'monstera', { order: 0.5 });
+    } else if (c === 2) {
+      // diante da War Room e da biblioteca: banco de espera e plantas
+      const bench = b.furn('bench', x + 11, 0, undefined, { order: 0.5 });
+      for (let i = 0; i < 2; i++) b.seat('bench', 'bench', x + 11 + i, 0, 'down', undefined, { noFurniture: true, furnitureId: bench });
+      b.furn('plant_small', x + 3, 0, 'succulent', { order: 0.5 });
+      b.furn('plant_small', x + 12, 4, 'flower', { order: 0.5 });
     } else {
       // colunas de projeto alternam: bebedouro (pares) e banco de espera (ímpares)
       const k = c - CORE_COLS;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { councilMember } from '../council';
 import { DemoSimulator } from './simulator';
 
 describe('DemoSimulator', () => {
@@ -192,5 +193,20 @@ describe('DemoSimulator: Codex', () => {
     expect(deliveredAt).toBeGreaterThan(start);
     // Entrou depois do fim de um turno (o Codex só usa a fila com a sessão ociosa).
     expect(['done', 'communicate']).toContain(statusAtDelivery);
+  });
+
+  it('council=1: o conselho já delibera na abertura, com nome e visual de cada membro, e cada um escreve a crítica', () => {
+    const sim = new DemoSimulator({ seed: 3, council: true }, 1_000);
+    const members = sim.snapshot(1_000).agents.filter((a) => a.council);
+    expect(members.length).toBeGreaterThanOrEqual(3);
+    for (const m of members) {
+      expect(m).toMatchObject({ kind: 'sub', name: councilMember(m.council)!.name, role: 'general-purpose' });
+      expect(m.parts).toEqual(councilMember(m.council)!.parts);
+    }
+    const said = new Set<string>();
+    for (let t = 1_000; t < 60_000; t += 250) {
+      for (const f of sim.tick(t).feed) if (f.activity.kind === 'respond' && f.activity.detail) said.add(f.agentId);
+    }
+    for (const m of members) expect(said.has(m.id), m.name).toBe(true);
   });
 });

@@ -23,6 +23,8 @@ import { pickName } from '../names';
 import { demoGitHubEvent } from './github';
 import { demoCodexPermission, demoPermission, type DemoPermissionKind } from './permission';
 import { tr } from '../i18n';
+import { councilMember } from '../council';
+import { COUNCIL_CRITIQUES, COUNCIL_PANELS, COUNCIL_TOPICS } from './council';
 
 interface DemoProject {
   name: string;
@@ -187,6 +189,9 @@ interface SimAgent {
   /** Codex: mensagens na fila da sessão (entram quando ela fica ociosa) e a partir de quando entram. */
   inbox?: string[];
   inboxAt?: number;
+  /** Membro do conselho: a crítica que ele "escreve" e quando. */
+  critique?: string;
+  critiqueAt?: number;
 }
 
 export interface DemoTickResult {
@@ -205,6 +210,8 @@ export interface DemoOptions {
   idPrefix?: string;
   /** Conta do Codex sempre "sem cota" (capturas de tela e testes); sem isso, ela fica sem cota só de vez em quando. */
   codexNoQuota?: boolean;
+  /** Conselho (/council) já na abertura e em metade das delegações; sem isso, só de vez em quando. */
+  council?: boolean;
 }
 
 const SLOT_COOLDOWN_MS = 30_000;
@@ -249,6 +256,10 @@ export class DemoSimulator {
   private codexReadNoQuota: boolean;
   /** Sessões principais abertas até agora (a 2ª da abertura é a do Codex dividindo a sala da 1ª). */
   private mainsSpawned = 0;
+  /** Sorteio próprio do conselho: não mexe na sequência do resto. */
+  private councilRng: () => number;
+  private councilMode: boolean;
+  private delegations = 0;
 
   constructor(opts: DemoOptions = {}, now = Date.now()) {
     this.rng = mulberry32(opts.seed ?? hash32(String(now)));
@@ -258,6 +269,8 @@ export class DemoSimulator {
     this.nextGitHubAt = now + (10_000 + this.ghRng() * 10_000) / this.speed;
     this.prSeq = 12 + Math.floor(this.ghRng() * 80);
     this.codexRng = mulberry32(((opts.seed ?? hash32(String(now))) ^ 0x3c6ef372) >>> 0);
+    this.councilRng = mulberry32(((opts.seed ?? hash32(String(now))) ^ 0xa54ff53a) >>> 0);
+    this.councilMode = !!opts.council;
     this.target = opts.sessions ?? 4;
     this.prefix = opts.idPrefix ?? '';
     this.tag = now.toString(36);
@@ -293,6 +306,11 @@ export class DemoSimulator {
     for (let i = 0; i < this.target - 1; i++) this.spawnSession(now, true);
     const first = [...this.agents.values()].find((a) => a.info.kind === 'main');
     if (first) this.startBackgroundShells(first, now, true);
+    if (this.councilMode) {
+      const mains = [...this.agents.values()].filter((a) => a.info.kind === 'main' && a.info.provider !== 'codex');
+      const host = mains.find((a) => a !== first) ?? mains[0];
+      if (host) this.startCouncil(host, now);
+    }
     this.nextSpawnAt = now + this.ms(20_000, 40_000);
     // Descarta o feed/avisos de abertura.
     this.pendingFeed = [];
@@ -589,13 +607,30 @@ export class DemoSimulator {
     this.dirty = true;
   }
 
-  private spawnSub(parent: SimAgent, now: number): void {
+  /** Metade das delegações no modo conselho; senão, uma em sete. */
+  private wantsCouncil(): boolean {
+    return this.councilMode ? this.delegations++ % 2 === 0 : this.councilRng() < 1 / 7;
+  }
+
+  /** O agente convoca o conselho: um painel delibera sobre uma pauta (cada membro é um subagente). */
+  private startCouncil(a: SimAgent, now: number): void {
+    const topic = COUNCIL_TOPICS[Math.floor(this.councilRng() * COUNCIL_TOPICS.length)];
+    const panel = COUNCIL_PANELS[Math.floor(this.councilRng() * COUNCIL_PANELS.length)];
+    this.activity(a, now, describeTool('Agent', { description: tr('Conselho: {0}', [topic]), subagent_type: 'general-purpose' }));
+    for (const key of panel) this.spawnSub(a, now, { key, topic });
+    a.phase = 'delegating';
+    this.setStatus(a, 'working', now);
+    this.notice(now, 'info', tr('🏛️ {0} convocou o conselho: {1}', [a.info.name, topic]), a.info.id, a.info.roomId);
+  }
+
+  private spawnSub(parent: SimAgent, now: number, council?: { key: string; topic: string }): void {
     const n = ++this.seq;
     const agentId = `a${Math.floor(this.rng() * 1e12).toString(16)}`;
     const id = `${parent.info.sessionId}:${agentId}`;
-    const person = pickName(id, this.usedNames());
+    const member = councilMember(council?.key);
+    const person = member ? { name: member.name, look: member.look } : pickName(id, this.usedNames());
     const rng = mulberry32(hash32(id));
-    const desc = this.pick(SUB_TASKS, rng);
+    const desc = council ? council.topic : this.pick(SUB_TASKS, rng);
     const info: AgentInfo = {
       id,
       kind: 'sub',
@@ -616,16 +651,22 @@ export class DemoSimulator {
       lastEventAt: now,
       statusSince: now,
       stats: { toolCalls: 0, tokensIn: 0, tokensOut: 0, subagents: 0 },
-      seed: hash32(id),
+      seed: member ? hash32(`council:${member.key}`) : hash32(id),
       background: rng() < 0.3,
     };
+    if (member) {
+      info.council = member.key;
+      info.parts = { ...member.parts };
+      info.role = 'general-purpose';
+      info.background = false;
+    }
     if (parent.info.provider === 'codex') info.provider = 'codex';
     const sub: SimAgent = {
       info,
       project: parent.project,
       rng,
       phase: 'working',
-      phaseUntil: now + this.ms(18_000, 55_000),
+      phaseUntil: now + (member ? this.ms(26_000, 40_000) : this.ms(18_000, 55_000)),
       nextActionAt: now + this.ms(1_500, 3_000),
       actionsLeft: 99,
       children: [],
@@ -635,6 +676,10 @@ export class DemoSimulator {
       shelledThisTurn: true,
       foregroundThisTurn: true,
     };
+    if (member) {
+      sub.critique = COUNCIL_CRITIQUES[member.key];
+      sub.critiqueAt = now + (sub.phaseUntil - now) * (0.5 + rng() * 0.2);
+    }
     this.agents.set(id, sub);
     parent.children.push(id);
     parent.info.stats.subagents++;
@@ -743,6 +788,8 @@ export class DemoSimulator {
           const roll = a.rng();
           if (roll < 0.1) {
             this.askPermission(a, now);
+          } else if (roll < 0.2 && a.children.length === 0 && a.info.provider !== 'codex' && this.wantsCouncil()) {
+            this.startCouncil(a, now);
           } else if (roll < 0.2 && a.children.length === 0) {
             const count = 2 + Math.floor(a.rng() * 3);
             this.activity(a, now, describeTool('Agent', { description: tr('{0} frentes em paralelo', [count]), subagent_type: 'general-purpose' }));
@@ -769,6 +816,12 @@ export class DemoSimulator {
       a.removeAt = now + DONE_GRACE_MS;
       const parent = a.info.parentId ? this.agents.get(a.info.parentId) : undefined;
       this.notice(now, 'success', tr('📦 {0} entregou “{1}” para {2}', [a.info.name, a.info.title, parent?.info.name ?? tr('o agente')]), a.info.id, a.info.roomId);
+      return;
+    }
+    if (a.critique && now >= (a.critiqueAt ?? 0)) {
+      this.activity(a, now, SPECIAL.respond(a.critique));
+      delete a.critique;
+      a.nextActionAt = now + this.ms(6_000, 9_000);
       return;
     }
     if (now >= a.nextActionAt) {

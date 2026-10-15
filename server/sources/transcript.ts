@@ -6,6 +6,7 @@ import { createReadStream } from 'node:fs';
 import type { Activity, AgentStats, TaskItem, TaskStatus } from '../../shared/types';
 import { describePrompt, describeShellJob, describeTool, maskSecrets, SPECIAL, truncate, type ActivityDescription } from '../../shared/activity';
 import type { GitHubEvent } from '../../shared/github';
+import { councilMemberOf } from '../../shared/council';
 import { detectGitHubNotification, detectGitHubResult, githubCallOf, type GitHubCall } from './github';
 import type { ShellStart } from './shells';
 import { LineBuffer, warnOversizedLine } from './tail';
@@ -73,6 +74,8 @@ export interface SpawnInfo {
   description?: string;
   subagentType?: string;
   name?: string;
+  /** Membro do conselho (/council) reconhecido no pedido; ver shared/council.ts. */
+  council?: string;
   background: boolean;
   at: number;
 }
@@ -475,6 +478,8 @@ class LineParser {
         if (description) spawn.description = description;
         if (subagentType) spawn.subagentType = subagentType;
         if (agentName) spawn.name = agentName;
+        const council = councilMemberOf(subagentType, agentName, description, str(input.prompt));
+        if (council) spawn.council = council;
         this.out.signals.push({ type: 'spawn', spawn });
         break;
       }

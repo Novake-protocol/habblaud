@@ -27,6 +27,7 @@ import { SHELL_WAIT_TOOL, SPECIAL, type ShellOutcome } from '../../shared/activi
 import { nameKey, type AppearanceParts } from '../../shared/appearance';
 import { DemoSimulator } from '../../shared/demo/simulator';
 import { describeGitHubEvent, githubEventKey, RoomEffects, type GitHubEvent } from '../../shared/github';
+import { councilMember } from '../../shared/council';
 import { hash32 } from '../../shared/hash';
 import { applyPermission } from '../permissions/registry';
 import type { NameStore, StoredCharacter } from './names';
@@ -114,6 +115,8 @@ export interface SubInput {
   title?: string;
   background: boolean;
   startedAt: number;
+  /** Membro do conselho (/council): nome e visual fixos e lugar na War Room. */
+  council?: string;
 }
 
 interface AgentRecord {
@@ -586,7 +589,10 @@ export class Office {
       this.reactivateSub(p.id);
       return true;
     }
-    const person = this.deps.names.assign(p.id, this.takenNames());
+    const member = councilMember(p.council);
+    if (member) this.retireCouncilSeat(member.key, now);
+    // Conselheiro: nome fixo, fora do names.json (cada rodada do /council é um subagente novo).
+    const person = member ? { name: member.name, look: member.look } : this.deps.names.assign(p.id, this.takenNames());
     const info: AgentInfo = {
       id: p.id,
       kind: 'sub',
@@ -604,14 +610,30 @@ export class Office {
       lastEventAt: p.startedAt,
       statusSince: now,
       stats: zeroStats(),
-      seed: hash32(p.id),
+      seed: member ? hash32(`council:${member.key}`) : hash32(p.id),
     };
+    if (member) {
+      info.council = member.key;
+      info.parts = { ...member.parts };
+    }
     if (parent.info.provider) info.provider = parent.info.provider;
     if (p.title) info.title = p.title;
     if (p.background) info.background = true;
     this.agents.set(p.id, { info, history: [], turnStart: now });
     this.markDirty();
     return true;
+  }
+
+  /**
+   * Nova rodada do /council: o mesmo membro volta como outro subagente. O da rodada anterior que já terminou sai
+   * agora (libera o lugar à mesa em vez de haver dois "Sócrates" ao mesmo tempo).
+   */
+  private retireCouncilSeat(key: string, now: number): void {
+    for (const rec of this.agents.values()) {
+      if (rec.info.council !== key || rec.info.status !== 'done') continue;
+      rec.removeAt = Math.min(rec.removeAt ?? Infinity, now);
+      this.markDirty();
+    }
   }
 
   completeSub(id: string, opts: { notify?: boolean } = {}): void {

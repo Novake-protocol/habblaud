@@ -9,6 +9,7 @@
 import { existsSync, readdirSync, readFileSync, statSync, watch, type FSWatcher } from 'node:fs';
 import { join } from 'node:path';
 import { SPECIAL } from '../../shared/activity';
+import { councilMemberOf } from '../../shared/council';
 import type { Activity, AgentStatus, SourceInfo } from '../../shared/types';
 import type { AccountsService } from '../accounts/service';
 import { errMsg, log } from '../log';
@@ -758,6 +759,8 @@ export class ClaudeWatcher implements AgentSource {
     const journalLabel = file.runId ? this.journal(t, file.runId).get(file.agentId)?.label : undefined;
     const title = meta?.description ?? spawn?.description ?? journalLabel;
     const background = meta?.requestShape ? meta.requestShape !== 'foreground' || !!spawn?.background : !!spawn?.background;
+    // Conselho: pelo pedido do Agent; sem ele (transcript do pai lido só no fim), pelo prompt no começo do sub.
+    const council = spawn?.council ?? councilMemberOf(meta?.agentType, meta?.description, ...firstPrompt(results));
     const added = office.addSub({
       id,
       parentId,
@@ -766,6 +769,7 @@ export class ClaudeWatcher implements AgentSource {
       title,
       background,
       startedAt: state.firstAt ?? now,
+      ...(council ? { council } : {}),
     });
     if (!added) return;
     t.known.delete(file.path);
@@ -911,4 +915,10 @@ export function readCustomTitleFile(sessionDir: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/** Texto do primeiro pedido lido de um subagente (o prompt que o disparou), para reconhecer o membro do conselho. */
+function firstPrompt(results: readonly LineResult[]): string[] {
+  for (const r of results) for (const p of r.activities) if (p.activity.kind === 'prompt') return [p.activity.detail ?? '', p.activity.text];
+  return [];
 }

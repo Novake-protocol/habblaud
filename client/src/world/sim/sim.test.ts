@@ -1,9 +1,11 @@
 // Integração da simulação sem DOM: snapshots -> personagens andando, sentando, apagando a luz e indo embora.
 import { describe, expect, it } from 'vitest';
 import type { AppearanceParts } from '../../../../shared/appearance';
-import type { AgentInfo, OfficeSnapshot, RoomInfo, ShellJob } from '../../../../shared/types';
+import type { Activity, AgentInfo, OfficeSnapshot, RoomInfo, ShellJob } from '../../../../shared/types';
 import type { Appearance, ArtModule, RoomTheme } from '../../art/api';
 import { DEFAULT_WORLD_OPTIONS } from '../api';
+import { CORE_COLS } from '../constants';
+import { WARROOM_ID } from '../layout/warroom';
 import type { Character } from './character';
 import { SHELL_DONE_TOOL, Sim } from './sim';
 
@@ -446,7 +448,7 @@ describe('salas sem buracos', () => {
     const clock = { now: T0 };
     sim.applySnapshot(snap([room('/c', 8), room('/a', 0), room('/b', 3)], [agent('ana', '/a', 'working'), agent('bia', '/b', 'working'), agent('caio', '/c', 'working')]), clock.now);
     expect(['/a', '/b', '/c'].map((id) => sim.rooms.get(id)!.slot)).toEqual([0, 1, 2]);
-    expect(sim.building.cols).toBe(4);
+    expect(sim.building.cols).toBe(CORE_COLS + 2);
   });
 
   it('terminal fechou: a sala mais distante se muda para a vaga, o pessoal vai andando e o prédio encolhe', () => {
@@ -460,7 +462,7 @@ describe('salas sem buracos', () => {
     const caio = sim.chars.get('caio')!;
     const homeBefore = caio.homeSpot;
     expect(c.slot).toBe(2);
-    expect(sim.building.cols).toBe(4);
+    expect(sim.building.cols).toBe(CORE_COLS + 2);
 
     // a sessão da sala /b fecha: bia vai embora e a sala é desmontada
     sim.applySnapshot(snap([room('/a', 0), room('/c', 2)], [agents[0], agent('bia', '/b', 'offline'), agents[2], agents[3]], 2), clock.now);
@@ -493,8 +495,8 @@ describe('salas sem buracos', () => {
     expect(c.lightOn).toBe(true);
     // o endereço antigo esvaziou, apagou e foi desmontado; o prédio voltou a ter uma coluna de salas
     expect(sim.rooms.has(ghost!.id)).toBe(false);
-    run(sim, clock, 10, () => sim.building.cols === 3);
-    expect(sim.building.cols).toBe(3);
+    run(sim, clock, 10, () => sim.building.cols === CORE_COLS + 1);
+    expect(sim.building.cols).toBe(CORE_COLS + 1);
     // davi (ocioso, talvez passeando) também tem o lugar dele na sala nova
     expect(c.layout.spots.some((p) => p.id === sim.chars.get('davi')!.homeSpot)).toBe(true);
   });
@@ -514,8 +516,8 @@ describe('salas sem buracos', () => {
     });
     expect(moved).toBe(false);
     expect(sim.rooms.has('/c')).toBe(false);
-    run(sim, clock, 5, () => sim.building.cols === 3);
-    expect(sim.building.cols).toBe(3);
+    run(sim, clock, 5, () => sim.building.cols === CORE_COLS + 1);
+    expect(sim.building.cols).toBe(CORE_COLS + 1);
   });
 
   it('abre e fecha ao acaso (inclusive no meio de uma mudança): ninguém se teletransporta e no fim não sobra buraco', () => {
@@ -573,8 +575,8 @@ describe('salas sem buracos', () => {
     expect([...sim.rooms.keys()].sort()).toEqual([...open.keys()].sort());
     expect(slots).toEqual(slots.map((_, i) => i));
     expect([...sim.rooms.values()].some((r) => r.ghost)).toBe(false);
-    run(sim, clock, 20, () => sim.building.cols === 2 + Math.ceil(open.size / 2));
-    expect(sim.building.cols).toBe(2 + Math.ceil(open.size / 2));
+    run(sim, clock, 20, () => sim.building.cols === CORE_COLS + Math.ceil(open.size / 2));
+    expect(sim.building.cols).toBe(CORE_COLS + Math.ceil(open.size / 2));
     expect(maxStep).toBeLessThan(12);
   });
 
@@ -762,5 +764,49 @@ describe('espera de shell', () => {
     expect(ana.mode).toBe('shell');
     expect(ana.shellCount).toBe(1);
     expect(ana.pose).toBe('wait');
+  });
+});
+
+describe('conselho na War Room', () => {
+  const sub = (id: string, council: string, extra: Partial<AgentInfo> = {}) =>
+    agent(id, '/a', 'working', { kind: 'sub', parentId: 'ana', role: 'general-purpose', council, ...extra });
+
+  it('conselheiros sentam à mesa da War Room, não na sala do projeto', () => {
+    const sim = newSim();
+    const clock = { now: T0 };
+    sim.applySnapshot(snap([room('/a', 0)], [agent('ana', '/a', 'working'), sub('soc', 'socrates'), sub('maq', 'machiavelli'), agent('explore', '/a', 'working', { kind: 'sub', parentId: 'ana' })]), clock.now);
+    run(sim, clock, 0.5);
+    for (const id of ['soc', 'maq']) {
+      const ch = sim.chars.get(id)!;
+      expect(ch.atSpot).toBe(ch.homeSpot);
+      expect(sim.spots.get(ch.homeSpot)).toMatchObject({ kind: 'council', areaId: WARROOM_ID });
+    }
+    expect(sim.spots.get(sim.chars.get('explore')!.homeSpot)?.areaId).toBe('/a');
+  });
+
+  it('quem chega depois anda até a War Room e fala o que está escrevendo', () => {
+    const sim = newSim();
+    const clock = { now: T0 };
+    sim.applySnapshot(snap([room('/a', 0)], [agent('ana', '/a', 'working')]), clock.now);
+    run(sim, clock, 0.5);
+    const act = (id: string, kind: Activity['kind'], detail?: string): Activity => ({ id, at: clock.now, kind, icon: '💬', text: 'x', ...(detail ? { detail } : {}) });
+    sim.applySnapshot(snap([room('/a', 0)], [agent('ana', '/a', 'working'), sub('fey', 'feynman', { activity: act('p1', 'prompt'), title: 'Rodada 1' })], 2), clock.now);
+    const fey = sim.chars.get('fey')!;
+    run(sim, clock, 30, () => fey.atSpot !== null && fey.atSpot === fey.homeSpot);
+    expect(sim.spots.get(fey.homeSpot)?.areaId).toBe(WARROOM_ID);
+    run(sim, clock, 1);
+    expect(fey.bubbleText).toBe('Analisando: Rodada 1');
+    sim.applySnapshot(snap([room('/a', 0)], [agent('ana', '/a', 'working'), sub('fey', 'feynman', { activity: act('r1', 'respond', 'What I cannot create, I do not understand. Ship the smaller test first.'), title: 'Rodada 1' })], 3), clock.now);
+    run(sim, clock, 8, () => fey.bubbleText?.startsWith('What I cannot') ?? false);
+    expect(fey.bubbleText).toMatch(/^What I cannot create/);
+    expect(fey.bubbleIcon).toBe('⚛️');
+    // concluiu no meio da fala: termina à mesa e só depois leva o veredito
+    const home = fey.homeSpot;
+    sim.applySnapshot(snap([room('/a', 0)], [agent('ana', '/a', 'working'), sub('fey', 'feynman', { status: 'done', activity: act('d1', 'done'), title: 'Rodada 1' })], 4), clock.now);
+    run(sim, clock, 1);
+    expect(fey.atSpot).toBe(home);
+    run(sim, clock, 30, () => fey.councilSay.length === 0);
+    run(sim, clock, 15, () => fey.atSpot !== home);
+    expect(fey.atSpot).not.toBe(home);
   });
 });

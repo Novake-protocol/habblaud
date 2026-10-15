@@ -214,6 +214,19 @@ describe('parseLine — sinais de subagentes', () => {
     expect(s.stats.subagents).toBe(1);
   });
 
+  it('membro do /council: reconhecido pelo prompt (a skill dispara como general-purpose)', () => {
+    const s = createTranscriptState();
+    const prompt = `You are operating as a council member in a structured deliberation.
+Read your agent definition at ~/.claude/agents/council-machiavelli.md and follow it precisely.`;
+    const r = feed(s, [
+      L.assistant([L.tool('toolu_c', 'Agent', { description: 'Round 1', subagent_type: 'general-purpose', prompt })]),
+      L.assistant([L.tool('toolu_d', 'Agent', { description: 'Revisar', subagent_type: 'Explore', prompt: 'olhe o código' })]),
+    ]);
+    expect(r[0].signals).toEqual([{ type: 'spawn', spawn: expect.objectContaining({ toolUseId: 'toolu_c', council: 'machiavelli' }) }]);
+    expect(r[1].signals[0]).toMatchObject({ type: 'spawn' });
+    expect((r[1].signals[0] as { spawn: { council?: string } }).spawn.council).toBeUndefined();
+  });
+
   it('em segundo plano: lançado (não termina) e depois notificação', () => {
     const s = createTranscriptState();
     const r = feed(s, [

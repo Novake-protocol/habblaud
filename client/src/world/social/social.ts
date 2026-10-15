@@ -9,6 +9,7 @@ import type { AgentSocial, SocialEvent } from '../api';
 import { mulberry32 } from '../../../../shared/hash';
 import { TILE } from '../constants';
 import { CAFE_ID, LOUNGE_ID, RECEPTION_ID, RESTROOM_ID } from '../layout/core';
+import { LIBRARY_ID, WARROOM_ID } from '../layout/warroom';
 import type { SpotDef } from '../layout/types';
 import { FREE } from '../path/grid';
 import { isLongIdle } from '../sim/behavior';
@@ -63,7 +64,7 @@ const COIN_COLOR = '#ffd34d';
 const LOSS_COLOR = '#ff8a8a';
 
 const KIND_LIST = Object.keys(KINDS) as GatherKind[];
-const PLACES: Readonly<Record<string, string>> = { [LOUNGE_ID]: tr('Lounge'), [CAFE_ID]: tr('Copa'), [RECEPTION_ID]: tr('Recepção'), [RESTROOM_ID]: tr('Banheiros') };
+const PLACES: Readonly<Record<string, string>> = { [LOUNGE_ID]: tr('Lounge'), [CAFE_ID]: tr('Copa'), [RECEPTION_ID]: tr('Recepção'), [RESTROOM_ID]: tr('Banheiros'), [WARROOM_ID]: 'War Room', [LIBRARY_ID]: tr('Biblioteca') };
 /** O que se perde/ganha em cada jogo (texto do extrato: "Perdeu no jokenpô para Rafaela"). */
 const MATCH_WHAT: Partial<Record<GatherKind, string>> = {
   rps: tr('no jokenpô'),

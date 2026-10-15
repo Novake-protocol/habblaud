@@ -5,33 +5,28 @@ export interface PersonName {
   look: 'f' | 'm';
 }
 
-// Nomes brasileiros para os personagens. Sem duplicatas e sem variações quase iguais
-// (ex.: Thiago/Tiago), para que cada personagem seja inconfundível no escritório.
-const F = [
-  'Ana', 'Beatriz', 'Camila', 'Daniela', 'Eduarda', 'Fernanda', 'Gabriela', 'Helena', 'Isabela', 'Júlia',
-  'Larissa', 'Mariana', 'Natália', 'Olívia', 'Paula', 'Rebeca', 'Sofia', 'Tatiana', 'Valentina', 'Yasmin',
-  'Alice', 'Bianca', 'Cecília', 'Débora', 'Elisa', 'Flávia', 'Giovana', 'Heloísa', 'Iara', 'Jéssica',
-  'Lívia', 'Manuela', 'Melissa', 'Nina', 'Priscila', 'Rafaela', 'Sabrina', 'Teresa', 'Vitória', 'Zoe',
-  'Aline', 'Bruna', 'Clara', 'Estela', 'Fabiana', 'Glória', 'Ingrid', 'Joana', 'Kátia', 'Lara',
-  'Maitê', 'Mirela', 'Noemi', 'Pietra', 'Renata', 'Simone', 'Sara', 'Vanessa', 'Luana', 'Marina',
-];
-const M = [
-  'Arthur', 'Bruno', 'Caio', 'Diego', 'Enzo', 'Felipe', 'Gustavo', 'Henrique', 'Igor', 'João',
-  'Kauã', 'Lucas', 'Mateus', 'Nicolas', 'Otávio', 'Pedro', 'Rafael', 'Samuel', 'Thiago', 'Vinícius',
-  'Bernardo', 'Danilo', 'Davi', 'Emanuel', 'Fábio', 'Gael', 'Heitor', 'Hugo', 'Joaquim', 'Jorge',
-  'Leonardo', 'Lorenzo', 'Luan', 'Marcelo', 'Murilo', 'Noah', 'Otto', 'Raul', 'Renato', 'Ricardo',
-  'Rodrigo', 'Sérgio', 'Theo', 'Tomás', 'Ulisses', 'Vicente', 'Wagner', 'Yuri', 'Augusto', 'Benício',
-  'César', 'Douglas', 'Elias', 'Francisco', 'Guilherme', 'Ícaro', 'Jonas', 'Leandro', 'Miguel', 'Paulo',
+// Nomes dos personagens: os agentes operacionais do NovaK (OneDrive/nova-workspace/AGENTS.md), não nomes de pessoas.
+// Com mais agentes no escritório do que nomes, o pool repete com sufixo ("FORGE 2"). `look` só varia o visual.
+const AGENTS: readonly PersonName[] = [
+  { name: 'NOVA', look: 'f' },
+  { name: 'FORGE', look: 'm' },
+  { name: 'SIGNAL', look: 'f' },
+  { name: 'SEC', look: 'm' },
+  { name: 'AEGIS', look: 'f' },
+  { name: 'FRONT', look: 'm' },
+  { name: 'BRAND', look: 'f' },
+  { name: 'DEVOPS', look: 'm' },
+  { name: 'GROWTH', look: 'f' },
+  { name: 'QA', look: 'm' },
+  { name: 'CHAOS', look: 'f' },
+  { name: 'ARCHEX', look: 'm' },
 ];
 
-export const NAME_POOL: readonly PersonName[] = Object.freeze(
-  // Intercala para que nomes vizinhos no pool alternem a dica visual.
-  F.flatMap((f, i) => [{ name: f, look: 'f' as const }, ...(M[i] ? [{ name: M[i], look: 'm' as const }] : [])]),
-);
+export const NAME_POOL: readonly PersonName[] = Object.freeze(AGENTS.map((a) => Object.freeze({ ...a })));
 
 /**
  * Escolhe um nome determinístico para `id`, evitando os já usados.
- * Se o pool esgotar, acrescenta um sufixo numérico ("Ana 2").
+ * Se o pool esgotar, acrescenta um sufixo numérico ("FORGE 2").
  */
 export function pickName(id: string, used: ReadonlySet<string>): PersonName {
   const n = NAME_POOL.length;

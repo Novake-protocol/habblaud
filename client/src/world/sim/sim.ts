@@ -7,6 +7,7 @@ import type { WorldOptions } from '../api';
 import { COL_W, COMPACT_DELAY_MS, DISMANTLE_DELAY_MS, FOOT_DX, FOOT_DY, MISSING_DEBOUNCE_MS, RUN_SPEED, TILE, WALK_SPEED } from '../constants';
 import { assembleBuilding, type BuildingLayout } from '../layout/building';
 import { RECEPTION_ID } from '../layout/core';
+import { WARROOM_ID } from '../layout/warroom';
 import { columnsFor, inRect } from '../layout/geometry';
 import { layoutProjectRoom } from '../layout/room';
 import type { SpotDef, SpotKind } from '../layout/types';
@@ -29,6 +30,7 @@ import {
   type Mode,
 } from './behavior';
 import { Character, dirOf, facing } from './character';
+import { chooseCouncilSeat, nextCouncilLine, queueCouncilSpeech, stillSpeaking } from './council';
 import { Elevator } from './elevator';
 import { RoomFxState } from './github';
 import { RoomState } from './room-state';
@@ -271,6 +273,7 @@ export class Sim {
     if (act && act.id !== ch.lastActivityId) {
       const firstSeen = ch.lastActivityId === null;
       ch.lastActivityId = act.id;
+      if (a.council) queueCouncilSpeech(ch, act, a.title);
       if (!firstSeen) {
         ch.activityChangedAt = now;
         if (act.kind === 'done') ch.setIcon('check', 2600, now);
@@ -398,6 +401,7 @@ export class Sim {
     }
     const ch = new Character(a, appearance);
     ch.lastActivityId = a.activity?.id ?? null;
+    if (a.council && a.activity && !first) queueCouncilSpeech(ch, a.activity, a.title);
     ch.shellDoneAt = latestShellDone(a)?.at ?? 0;
     this.chars.set(a.id, ch);
     if (first) return ch;
@@ -475,6 +479,12 @@ export class Sim {
   private assignHome(ch: Character): void {
     if (ch.homeSpot && this.spots.get(ch.homeSpot) && this.spots.ownerOf(ch.homeSpot) === ch.id) return;
     ch.homeSpot = null;
+    if (ch.info.council) {
+      // conselheiro: lugar à mesa da War Room, não na sala do projeto
+      const seat = chooseCouncilSeat([...this.spots.all()], (id) => this.spots.isFree(id, ch.id));
+      if (seat && this.spots.reserve(seat.id, ch.id)) ch.homeSpot = seat.id;
+      return;
+    }
     const room = this.rooms.get(ch.roomId);
     if (!room || !room.present) return;
     const seat = chooseSeat(room.layout.spots, (id) => this.spots.isFree(id, ch.id), ch.info.kind);
@@ -749,6 +759,10 @@ export class Sim {
     // junto. O cochilo na mesa de quem está ocioso há muito tempo não muda o modo, então ninguém mais o apagaria.
     if (ch.icon === 'zzz' && ch.pose !== 'sleep') ch.icon = null;
     if (ch.mode === 'shell' && ch.shellSince) ch.shellStage = shellStage(now - ch.shellSince);
+    if (ch.info.council && !ch.leaving && !ch.arriving) {
+      const line = nextCouncilLine(ch, ch.info.council, now, ch.bubbleText ? ch.bubbleUntil : 0);
+      if (line) ch.showBubble(line[0], line[1], line[2], now);
+    }
     if (!ch.step) {
       if (ch.replan) {
         ch.replan = false;
@@ -1147,7 +1161,10 @@ export class Sim {
   private think(ch: Character, now: number): boolean {
     if (ch.gone) return false;
     if (ch.mode === 'leave') return this.planLeave(ch, now);
+    // conselheiro que concluiu termina a fala à mesa e só então leva o veredito
+    if (ch.mode === 'deliver' && ch.info.council && stillSpeaking(ch) && ch.atSpot === ch.homeSpot) return false;
     if (ch.mode === 'deliver') return this.planDeliver(ch, now);
+    if (ch.info.council) return this.planCouncil(ch, now);
     const room = this.rooms.get(ch.roomId);
     if (!room || !room.present) return this.planLobby(ch, room);
     this.assignHome(ch);
@@ -1188,6 +1205,27 @@ export class Sim {
         if (this.social.hasCompany(ch, now) && ch.rng() < 0.5 + p.sociability * 0.4 && this.social.tryInitiate(ch, now, true)) return true;
       }
     }
+    return false;
+  }
+
+  /**
+   * Conselheiro: senta à mesa da War Room e fica lá deliberando (sem passeios nem luz da sala do projeto). Mesa cheia:
+   * espera em pé no meio da sala até vagar um lugar.
+   */
+  private planCouncil(ch: Character, now: number): boolean {
+    this.assignHome(ch);
+    if (!ch.homeSpot) {
+      const war = this.building.core.find((a) => a.id === WARROOM_ID);
+      if (!war) return this.planLobby(ch, undefined);
+      const r = war.rect;
+      const t = { x: r.x + 7 + Math.floor(ch.rng() * 2), y: r.y + 9 };
+      ch.arriving = false;
+      if (ch.tx !== t.x || ch.ty !== t.y) ch.queue.push({ t: 'go', tx: t.x, ty: t.y, dir: 'up' });
+      ch.queue.push({ t: 'until', cond: () => !!chooseCouncilSeat([...this.spots.all()], (id) => this.spots.isFree(id, ch.id)), minMs: 1500, maxMs: 8000, pose: 'stand', dir: 'up' });
+      return true;
+    }
+    if (ch.atSpot !== ch.homeSpot) return this.planGoHome(ch, now);
+    ch.arriving = false;
     return false;
   }
 
