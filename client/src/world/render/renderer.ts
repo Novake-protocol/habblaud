@@ -73,7 +73,9 @@ const POPCORN_DY: Readonly<Record<string, number>> = { down: 11, up: 8, left: 9,
 const WEB_MAX_OUT = 9;
 /** Tom das bordas da área externa (vinheta) e do gramado além dela. */
 const VIGNETTE_ALPHA = 0.2;
-const VIGNETTE_EDGE = `rgba(18,40,26,${VIGNETTE_ALPHA})`;
+/** Tom da vinheta nas bordas do gramado: a tinta NovaK (#17132b), não mais verde-escuro. */
+const VIGNETTE_RGB = [23, 19, 43] as const;
+const VIGNETTE_EDGE = `rgba(${VIGNETTE_RGB.join(',')},${VIGNETTE_ALPHA})`;
 
 export class Renderer {
   readonly ctx: CanvasRenderingContext2D;
@@ -241,7 +243,8 @@ export class Renderer {
       this.grass = this.ctx.createPattern(tile, 'repeat');
       // cor de fundo (antes do padrão carregar): a média já com o tom da vinheta
       const k = VIGNETTE_ALPHA;
-      this.clearColor = `rgb(${Math.round((r / n) * (1 - k) + 18 * k)},${Math.round((g / n) * (1 - k) + 40 * k)},${Math.round((bl / n) * (1 - k) + 26 * k)})`;
+      const [vr, vg, vb] = VIGNETTE_RGB;
+      this.clearColor = `rgb(${Math.round((r / n) * (1 - k) + vr * k)},${Math.round((g / n) * (1 - k) + vg * k)},${Math.round((bl / n) * (1 - k) + vb * k)})`;
     } catch {
       this.grass = null;
       this.clearColor = '#6f9a5a';

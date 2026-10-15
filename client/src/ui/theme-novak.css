@@ -3,7 +3,9 @@
    Tema claro "Casa NovaK" por padrão; "Noite orbital" com data-theme="dark" (ui/theme.ts).
    Os tokens --rgb-* são canais "R G B" para usar com alfa: rgb(var(--rgb-tint) / .06). Ouro em texto só na versão
    escura do tom (#8c6a1f no claro): o #c6a45b sobre marfim fica em ~2,4:1 e serve só para linhas e preenchimentos.
-   Terminal, replay, estatísticas do dia e visualizador de entregas continuam escuros nos dois temas. */
+   O terminal (conversa e terminal interativo) fica escuro nos dois temas, de propósito: a saída ANSI do Claude Code
+   e os diffs foram feitos para fundo escuro. Ele recebe os tokens da Noite orbital (ilha escura abaixo) e a noite NovaK
+   (--term-*) com fios dourados. Replay, estatísticas do dia e visualizador de entregas seguem o tema. */
 
 .ui-root {
   --novak-ivory: #fffdf8;
@@ -62,6 +64,23 @@
   --rgb-violet: 91 36 214;
   --rgb-panel: 255 253 248;
   --rgb-primary: 91 36 214;
+  --rgb-gold: 198 164 91;
+  /* cinza de contexto do "ocioso" nos gráficos do Meu dia (3:1 ou mais sobre o painel) */
+  --day-idle-tone: #6b6577;
+
+  /* Terminal: noite NovaK (#0c0a16) com texto marfim e fios em ouro; igual nos dois temas. */
+  --term-bg: rgba(16, 13, 28, 0.97);
+  --term-well: #0c0a16;
+  --term-raise: rgba(255, 253, 248, 0.035);
+  --term-fg: #e4deec;
+  --term-dim: #9d95ae;
+  --term-soft: #bdb5cb;
+  --term-strong: #fffdf8;
+  --term-seg: rgba(198, 164, 91, 0.42);
+  --term-focus: rgba(216, 184, 122, 0.6);
+  --term-scroll: rgba(208, 196, 230, 0.24);
+  --term-select: #3a2c66;
+  --term-cursor: #d8b87a;
 
   --font-px: 'Cormorant Garamond', Georgia, serif;
   --font-display: 'Cormorant Garamond', Georgia, serif;
@@ -70,7 +89,9 @@
   color-scheme: light;
 }
 
-.ui-root[data-theme='dark'] {
+/* Noite orbital; também a ilha escura do terminal nos dois temas. */
+.ui-root[data-theme='dark'],
+.ui-root .ui-term {
   --ui-bg: rgba(20, 16, 31, 0.9);
   --ui-bg-solid: rgba(20, 16, 31, 0.97);
   --ui-bg-soft: rgba(255, 253, 248, 0.04);
@@ -117,6 +138,8 @@
   --rgb-violet: 170 140 255;
   --rgb-panel: 20 16 31;
   --rgb-primary: 107 58 232;
+  --rgb-gold: 198 164 91;
+  --day-idle-tone: #8a8494;
 
   color-scheme: dark;
 }

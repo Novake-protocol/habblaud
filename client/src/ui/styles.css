@@ -4514,8 +4514,6 @@
 .ui-term {
   --term-w: min(920px, 72vw, max(560px, calc(100vw - var(--free-left) - var(--free-right) - 16px)));
   --term-h: min(72vh, calc(100vh - var(--top-h) - var(--gap) * 2));
-  --term-fg: #d5dceb;
-  --term-dim: #8a93a8;
   position: fixed;
   z-index: 30;
   top: calc(var(--top-h) + var(--gap) + (100vh - var(--top-h) - var(--gap) * 2 - var(--term-h)) / 2);
@@ -4526,14 +4524,14 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--radius);
-  background: rgba(10, 12, 18, 0.96);
+  background: var(--term-bg);
   -webkit-backdrop-filter: blur(14px) saturate(1.25);
   backdrop-filter: blur(14px) saturate(1.25);
   border: 1px solid var(--ui-line-strong);
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.35),
-    0 28px 70px rgba(5, 7, 12, 0.62),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    0 0 0 1px rgb(var(--rgb-shade) / 0.35),
+    0 28px 70px rgb(var(--rgb-shadow) / 0.62),
+    inset 0 1px 0 rgb(var(--rgb-tint) / 0.05);
   color: var(--term-fg);
   transition:
     left 0.32s var(--ease),
@@ -4561,7 +4559,7 @@
   flex: none;
   height: 42px;
   padding: 0 6px 2px 12px;
-  background: rgba(255, 255, 255, 0.035);
+  background: var(--term-raise);
 }
 
 /* Fio segmentado em pixels sob a barra, como as barras de uso. */
@@ -4572,7 +4570,7 @@
   right: 0;
   bottom: 0;
   height: 2px;
-  background: repeating-linear-gradient(90deg, rgba(124, 200, 255, 0.32) 0 4px, transparent 4px 5px);
+  background: repeating-linear-gradient(90deg, var(--term-seg) 0 4px, transparent 4px 5px);
 }
 
 .ui-term__icon {
@@ -4606,7 +4604,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 700 13.5px/1.2 var(--font-ui);
-  color: #f3f6fc;
+  color: var(--term-strong);
 }
 
 .ui-term__who .ui-role {
@@ -4636,7 +4634,7 @@
   gap: 6px;
   flex: none;
   font-size: 11.5px;
-  color: #ffcf8a;
+  color: var(--ui-warn-text);
 }
 
 .ui-term__reconn::before {
@@ -4673,7 +4671,7 @@
   padding: 14px 16px 18px;
   font: 12.5px/1.55 var(--font-mono);
   scrollbar-width: thin;
-  scrollbar-color: rgba(160, 176, 210, 0.25) transparent;
+  scrollbar-color: var(--term-scroll) transparent;
 }
 
 .ui-root .ui-term__scroll:focus-visible {
@@ -4733,15 +4731,15 @@
   margin-inline: -8px;
   padding: 4px 8px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.065);
+  background: rgb(var(--rgb-tint) / 0.065);
 }
 
 .ui-term__row--user .ui-term__col {
-  color: #f0f3fa;
+  color: var(--term-strong);
 }
 
 .ui-term__row--assistant .ui-term__dot {
-  color: #f0f3fa;
+  color: var(--term-strong);
 }
 
 /* Ferramenta: ⏺ verde (ok), vermelho (erro) ou apagado (ainda sem resultado). */
@@ -4759,21 +4757,21 @@
 }
 
 .ui-term__title {
-  color: #c9d1e2;
+  color: var(--term-fg);
 }
 
 .ui-term__title strong {
   font-weight: 700;
-  color: #f3f6fc;
+  color: var(--term-strong);
 }
 
 .ui-term__in {
   margin-top: 4px;
   padding: 5px 9px;
   border-radius: 5px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgb(var(--rgb-shade) / 0.3);
   border: 1px solid var(--ui-line);
-  color: #c3cbdc;
+  color: var(--term-fg);
 }
 
 .ui-term__in--command {
@@ -4810,17 +4808,17 @@
 }
 
 .ui-term__dl.is-add {
-  background: rgba(79, 209, 139, 0.13);
-  color: #a6ecc4;
+  background: rgb(var(--rgb-ok) / 0.13);
+  color: var(--ui-ok-text);
 }
 
 .ui-term__dl.is-del {
-  background: rgba(255, 107, 107, 0.13);
-  color: #ffb3aa;
+  background: rgb(var(--rgb-crit) / 0.13);
+  color: color-mix(in srgb, var(--ui-danger) 60%, var(--term-strong));
 }
 
 .ui-term__dl.is-hunk {
-  color: #8fb8ff;
+  color: var(--ui-violet-text);
 }
 
 /* "  ⎿  resultado" */
@@ -4828,11 +4826,11 @@
   display: grid;
   grid-template-columns: 3ch minmax(0, 1fr);
   margin-top: 2px;
-  color: #a9b2c4;
+  color: var(--term-soft);
 }
 
 .ui-term__result.is-error {
-  color: #ff9b8f;
+  color: var(--ui-danger);
 }
 
 .ui-term__elbow {
@@ -4882,7 +4880,7 @@ button.ui-term__think:hover,
 }
 
 .ui-term__row--thinking .ui-term__mark {
-  color: #c08a6e;
+  color: var(--ui-accent);
 }
 
 .ui-term__row--system {
@@ -4890,11 +4888,11 @@ button.ui-term__think:hover,
 }
 
 .ui-term__row--system.is-warn {
-  color: #ffcf8a;
+  color: var(--ui-warn-text);
 }
 
 .ui-term__row--system.is-error {
-  color: #ff9b8f;
+  color: var(--ui-danger);
 }
 
 .ui-term__row--system.is-warn .ui-term__mark,
@@ -4951,10 +4949,10 @@ button.ui-term__think:hover,
   margin: 12px 12px 0;
   padding: 8px 8px 8px 12px;
   border-radius: 8px;
-  background: rgba(255, 107, 107, 0.1);
-  border: 1px solid rgba(255, 107, 107, 0.45);
+  background: rgb(var(--rgb-crit) / 0.1);
+  border: 1px solid rgb(var(--rgb-crit) / 0.45);
   font-size: 12.5px;
-  color: #ffd1cb;
+  color: color-mix(in srgb, var(--ui-danger) 35%, var(--term-strong));
   animation: ui-alert-in 0.3s var(--ease);
 }
 
@@ -4971,24 +4969,24 @@ button.ui-term__think:hover,
   height: 28px;
   padding: 0 12px;
   border-radius: 6px;
-  background: #2f7fd1;
-  border: 1px solid #58a6f2;
+  background: var(--ui-primary);
+  border: 1px solid var(--ui-primary-hover);
   font: 500 13px/1 var(--font-px);
   letter-spacing: 0.02em;
   white-space: nowrap;
-  color: #fff;
+  color: var(--term-strong);
   box-shadow:
-    inset 0 -2px 0 rgba(0, 0, 0, 0.22),
-    0 6px 16px rgba(5, 7, 12, 0.5);
+    inset 0 -2px 0 rgb(var(--rgb-shade) / 0.22),
+    0 6px 16px rgb(var(--rgb-shadow) / 0.5);
   animation: ui-term-new 0.2s var(--ease);
 }
 
 .ui-root .ui-term__new {
-  color: #fff;
+  color: var(--term-strong);
 }
 
 .ui-term__new:hover {
-  background: #3a8ee3;
+  background: var(--ui-primary-hover);
 }
 
 @keyframes ui-term-new {
@@ -5003,7 +5001,7 @@ button.ui-term__think:hover,
   flex: none;
   padding: 8px 12px 12px;
   border-top: 1px solid var(--ui-line);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgb(var(--rgb-tint) / 0.02);
   font: 12.5px/1.5 var(--font-mono);
 }
 
@@ -5037,11 +5035,11 @@ button.ui-term__think:hover,
 }
 
 .ui-term__status.is-working .ui-term__glyph {
-  color: #e8875b;
+  color: var(--ui-accent);
 }
 
 .ui-term__status.is-working .ui-term__status-text {
-  color: #f2b394;
+  color: var(--ui-accent-text);
 }
 
 .ui-term__status.is-waiting .ui-term__status-text {
@@ -5065,7 +5063,7 @@ button.ui-term__think:hover,
   min-height: 34px;
   padding: 7px 6px 7px 10px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgb(var(--rgb-shade) / 0.25);
   border: 1px solid var(--ui-line-strong);
   cursor: text;
   transition: border-color 0.15s;
@@ -5076,7 +5074,7 @@ button.ui-term__think:hover,
 }
 
 .ui-term__prompt:focus-within {
-  border-color: rgba(124, 200, 255, 0.55);
+  border-color: var(--term-focus);
 }
 
 .ui-term__prompt.is-disabled {
@@ -5291,7 +5289,7 @@ button.ui-term__think:hover,
 
 .ui-md__code {
   font: inherit;
-  color: #b9b4ff;
+  color: var(--ui-violet-text);
 }
 
 .ui-md__link {
@@ -5332,7 +5330,7 @@ button.ui-term__think:hover,
 
 .ui-md__pre {
   padding: 7px 10px;
-  color: #d0d8e8;
+  color: var(--term-fg);
 }
 
 .ui-md__lang + .ui-md__pre {
@@ -5429,7 +5427,7 @@ button.ui-term__think:hover,
   min-height: 38px;
   padding: 5px 10px 5px 12px;
   border-bottom: 1px solid var(--ui-line);
-  background: rgba(255, 255, 255, 0.015);
+  background: rgb(var(--rgb-tint) / 0.015);
 }
 
 .ui-term__filter {
@@ -5460,7 +5458,7 @@ button.ui-term__think:hover,
   margin-left: auto;
   padding: 0 2px 0 9px;
   border-radius: 7px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgb(var(--rgb-shade) / 0.3);
   border: 1px solid var(--ui-line-strong);
   color: var(--ui-faint);
   animation: ui-term-search-in 0.16s var(--ease);
@@ -5471,12 +5469,12 @@ button.ui-term__think:hover,
 }
 
 .ui-term__search:focus-within {
-  border-color: rgba(124, 200, 255, 0.55);
+  border-color: var(--term-focus);
   color: var(--ui-accent);
 }
 
 .ui-term__search.is-miss {
-  border-color: rgba(255, 107, 107, 0.55);
+  border-color: rgb(var(--rgb-crit) / 0.55);
 }
 
 @keyframes ui-term-search-in {
@@ -5529,7 +5527,7 @@ button.ui-term__think:hover,
 }
 
 .ui-term__search.is-miss .ui-term__count {
-  color: #ff9b8f;
+  color: var(--ui-danger);
 }
 
 .ui-term__step.ui-icon-btn--sm {
@@ -5545,15 +5543,15 @@ button.ui-term__think:hover,
 /* Resultados da busca: âmbar; o atual, laranja com contorno (o mesmo par do "precisa de você"). */
 .ui-term__hit {
   border-radius: 2px;
-  background: rgba(255, 181, 71, 0.3);
-  box-shadow: 0 0 0 1px rgba(255, 181, 71, 0.18);
+  background: rgb(var(--rgb-waiting) / 0.3);
+  box-shadow: 0 0 0 1px rgb(var(--rgb-waiting) / 0.18);
   color: inherit;
 }
 
 .ui-term__hit.is-current {
-  background: #ffb547;
-  box-shadow: 0 0 0 2px rgba(255, 181, 71, 0.45);
-  color: #12151d;
+  background: var(--st-waiting);
+  box-shadow: 0 0 0 2px rgb(var(--rgb-waiting) / 0.45);
+  color: var(--term-well);
 }
 
 /* Filtro: as linhas que não entram somem (a busca também não as conta). */
@@ -5584,7 +5582,7 @@ button.ui-term__think:hover,
   height: 22px;
   padding: 0 5px;
   border-radius: 5px;
-  background: rgba(16, 19, 27, 0.94);
+  background: var(--term-bg);
   border: 1px solid var(--ui-line-strong);
   font: 500 11px/1 var(--font-ui);
   color: var(--ui-muted);
@@ -5614,7 +5612,7 @@ button.ui-term__think:hover,
 
 .ui-term__copy:hover {
   color: var(--ui-text);
-  border-color: rgba(160, 176, 210, 0.4);
+  border-color: rgb(var(--rgb-line) / 0.4);
 }
 
 .ui-term__copy-icon {
@@ -5637,8 +5635,8 @@ button.ui-term__think:hover,
 }
 
 .ui-term__copy.is-fail {
-  border-color: rgba(255, 107, 107, 0.55);
-  color: #ff9b8f;
+  border-color: rgb(var(--rgb-crit) / 0.55);
+  color: var(--ui-danger);
 }
 
 .ui-term__copy.is-done .ui-term__copy-done,
@@ -5660,7 +5658,7 @@ button.ui-term__think:hover,
 }
 
 .ui-term.is-session .ui-term__kind {
-  color: #ffcf8a;
+  color: var(--ui-warn-text);
 }
 
 .ui-term.is-session .ui-term__name {
@@ -5838,16 +5836,17 @@ button.ui-term__think:hover,
 
 /* ------------------------------------------------------------------ timelapse (ui/timelapse.ts) */
 
-/* Escritório reproduzido: leve tom sépia e vinheta, para não confundir com o ao vivo (o selo diz a hora). */
+/* Escritório reproduzido: cores desbotadas e vinheta em tinta NovaK, para não confundir com o ao vivo (o selo diz a
+   hora). Pouco sépia: o castanho brigava com a noite violeta. */
 html.is-replay #world {
-  filter: sepia(0.3) saturate(0.9) contrast(1.03);
+  filter: saturate(0.72) sepia(0.12) contrast(1.03);
 }
 
 .ui-lapse-vignette {
   position: fixed;
   inset: 0;
   z-index: 1;
-  background: radial-gradient(ellipse at center, transparent 58%, rgba(44, 26, 8, 0.36) 100%);
+  background: radial-gradient(ellipse at center, transparent 58%, rgb(var(--rgb-shadow) / 0.34) 100%);
 }
 
 #ui > .ui-lapse-vignette,
@@ -5867,20 +5866,20 @@ html.is-replay #world {
   gap: 8px;
   padding: 6px 14px 6px 10px;
   border-radius: 8px;
-  background: rgba(46, 27, 10, 0.88);
-  border: 1px solid rgba(255, 196, 120, 0.45);
-  color: #ffe2b8;
+  background: var(--ui-bg-solid);
+  border: 1px solid rgb(var(--rgb-gold) / 0.6);
+  color: var(--ui-gold);
   white-space: nowrap;
   box-shadow:
-    0 10px 28px rgba(5, 7, 12, 0.4),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+    0 10px 28px rgb(var(--rgb-shadow) / 0.22),
+    inset 0 -3px 0 rgb(var(--rgb-gold) / 0.28);
 }
 
 .ui-lapse-badge__rec {
   width: 9px;
   height: 9px;
-  background: #ff5d5d;
-  box-shadow: 0 0 0 2px rgba(255, 93, 93, 0.25);
+  background: var(--lv-crit);
+  box-shadow: 0 0 0 2px rgb(var(--rgb-crit) / 0.25);
   animation: ui-blink 1.4s steps(1) infinite;
 }
 
@@ -5892,13 +5891,13 @@ html.is-replay #world {
 .ui-lapse-badge__time {
   font: 700 18px/1 var(--font-ui);
   font-variant-numeric: tabular-nums;
-  color: #fff3df;
+  color: var(--ui-text-strong);
 }
 
 .ui-lapse-badge__day,
 .ui-lapse-badge__note {
   font-size: 12px;
-  color: rgba(255, 226, 184, 0.75);
+  color: var(--ui-muted);
 }
 
 .ui-lapse-badge__note {
@@ -5940,7 +5939,7 @@ html.is-replay #world {
   height: 36px;
   color: var(--ui-accent);
   background: var(--ui-accent-soft);
-  box-shadow: inset 0 0 0 1px rgba(124, 200, 255, 0.35);
+  box-shadow: inset 0 0 0 1px rgb(var(--rgb-accent) / 0.35);
 }
 
 .ui-lapse__play:disabled {
@@ -5979,7 +5978,7 @@ html.is-replay #world {
 }
 
 .ui-lapse__day option {
-  background: #161a23;
+  background: var(--ui-panel);
   color: var(--ui-text);
 }
 
@@ -6000,7 +5999,7 @@ html.is-replay #world {
   width: 8px;
   height: 8px;
   background: var(--st-working);
-  box-shadow: 0 0 0 2px rgba(79, 209, 139, 0.22);
+  box-shadow: 0 0 0 2px rgb(var(--rgb-ok) / 0.22);
 }
 
 .ui-lapse__msg {
@@ -6019,7 +6018,7 @@ html.is-replay #world {
   position: relative;
   height: 38px;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--ui-well);
   border: 1px solid var(--ui-line);
 }
 
@@ -6049,7 +6048,7 @@ html.is-replay #world {
   bottom: 0;
   left: 0;
   width: var(--p);
-  background: rgba(124, 200, 255, 0.1);
+  background: var(--ui-accent-soft);
   border-right: 2px solid var(--ui-accent);
   border-radius: 6px 0 0 6px;
   pointer-events: none;
@@ -6064,7 +6063,7 @@ html.is-replay #world {
   width: 8px;
   height: 8px;
   background: var(--ui-accent);
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 -2px 0 rgb(var(--rgb-shade) / 0.25);
   pointer-events: none;
 }
 
@@ -6126,12 +6125,12 @@ html.is-replay #world {
   width: 16px;
   height: 10px;
   transform: translateX(-50%);
-  color: #ffd36b;
+  color: var(--st-waiting);
   pointer-events: auto;
 }
 
 .ui-lapse__peak:hover {
-  color: #fff0b8;
+  color: color-mix(in srgb, var(--st-waiting) 70%, var(--ui-mix));
 }
 
 .ui-lapse__ticks {
@@ -6690,7 +6689,7 @@ html.is-replay #world {
 .ui-dialog.ui-day {
   --day-waiting: #c98300;
   --day-working: #1bad69;
-  --day-idle: #5e6a83;
+  --day-idle: var(--day-idle-tone);
   --day-shell: #00aaa5;
   width: min(1060px, calc(100vw - 32px));
   max-height: min(92vh, 980px);
@@ -7315,7 +7314,7 @@ html.is-replay #world {
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--ui-line-strong);
-  background: #0e1118;
+  background: var(--ui-bg-solid);
   box-shadow: 0 10px 28px rgb(var(--rgb-shadow) / 0.55);
   font-size: 12px;
   pointer-events: none;
@@ -8147,7 +8146,7 @@ html.is-replay #world {
 
 .ui-btn--danger {
   border-color: rgb(var(--rgb-crit) / 0.45);
-  color: #ff9b9b;
+  color: var(--ui-danger);
 }
 
 .ui-btn--danger:hover {
@@ -8170,7 +8169,7 @@ html.is-replay #world {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
-  color: color-mix(in srgb, var(--st-working) 75%, #fff);
+  color: color-mix(in srgb, var(--st-working) 75%, var(--term-strong));
   background: color-mix(in srgb, var(--st-working) 16%, transparent);
 }
 
@@ -8185,7 +8184,7 @@ html.is-replay #world {
   flex: 1;
   min-height: 0;
   padding: 6px 4px 4px 10px;
-  background: #0a0c12;
+  background: var(--term-well);
 }
 
 .ui-pty__screen {
@@ -8232,7 +8231,7 @@ html.is-replay #world {
 }
 
 .ui-node__term:hover {
-  color: #fff;
+  color: var(--ui-text-strong);
   background: color-mix(in srgb, var(--ui-accent) 24%, var(--ui-bg-solid));
 }
 
@@ -8241,7 +8240,7 @@ html.is-replay #world {
 }
 
 .ui-node__term.is-on {
-  color: #fff;
+  color: var(--ui-text-strong);
   background: color-mix(in srgb, var(--ui-accent) 32%, var(--ui-bg-solid));
   box-shadow: inset 0 0 0 1px var(--ui-accent);
 }
@@ -8353,8 +8352,8 @@ html.is-replay #world {
 
 .ui-ttab__close.is-confirm {
   font-size: 11px;
-  color: #fff;
-  background: #c2413a;
+  color: var(--term-strong);
+  background: color-mix(in srgb, var(--lv-crit) 65%, var(--term-well));
 }
 
 .ui-ttab__live {
@@ -8392,7 +8391,7 @@ html.is-replay #world {
   flex: 1;
   padding: 24px;
   text-align: center;
-  background: #0a0c12;
+  background: var(--term-well);
 }
 
 .ui-pty__away strong {
@@ -8669,7 +8668,7 @@ html.is-replay #world {
 
 .ui-deliv-modal::backdrop,
 .ui-deliv-viewer::backdrop {
-  background: rgba(5, 8, 14, 0.72);
+  background: rgb(var(--rgb-shadow) / 0.62);
   backdrop-filter: blur(3px);
 }
 
@@ -8817,14 +8816,14 @@ html.is-replay #world {
   min-height: 44px;
 }
 
-/* Visualizador: tela cheia, fundo escuro. */
+/* Visualizador: tela cheia, no fundo do tema (areia no claro, noite na Noite orbital). */
 .ui-deliv-viewer {
   width: 100vw;
   height: 100dvh;
   max-width: none;
   max-height: none;
   margin: 0;
-  background: #05070b;
+  background: var(--ui-well);
 }
 
 .ui-deliv-viewer[open] {
@@ -8837,7 +8836,7 @@ html.is-replay #world {
   align-items: center;
   gap: 8px;
   padding: calc(8px + env(safe-area-inset-top)) 10px 8px;
-  background: rgba(18, 21, 29, 0.92);
+  background: var(--ui-bg-solid);
   border-bottom: 1px solid var(--ui-line);
 }
 
@@ -8904,7 +8903,8 @@ html.is-replay #world {
   height: 100%;
   border: 0;
   border-radius: 6px;
-  background: #fff;
+  background: var(--novak-ivory);
+  box-shadow: 0 0 0 1px var(--ui-line);
 }
 
 .ui-deliv-viewer__text {
@@ -8914,7 +8914,9 @@ html.is-replay #world {
   overflow: auto;
   padding: 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  color: var(--ui-text);
   font: 12px/1.5 var(--font-mono);
   white-space: pre-wrap;
 }
@@ -8938,7 +8940,7 @@ html.is-replay #world {
   padding: 10px 14px;
   border-radius: 14px;
   border: 1px solid rgb(var(--rgb-waiting) / 0.55);
-  background: rgba(24, 20, 12, 0.96);
+  background: var(--ui-bg-solid);
   color: var(--ui-text);
   text-align: left;
   font: inherit;

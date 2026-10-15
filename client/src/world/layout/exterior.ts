@@ -5,7 +5,8 @@ import { BUILDING_H, COL_W, CORE_COLS, CORRIDOR_Y, EXT_EAST, EXT_NORTH, EXT_SOUT
 import { cellRect, slotAt, slotColumn, slotSide } from './geometry';
 import type { ExteriorProp, FloorPatch, TileRect, WallItemPlacement, WallSegment } from './types';
 
-export const EXTERIOR_WALL: WallStyle = { base: '#cfc8bd', trim: '#8a8174', pattern: 'brick', exterior: true };
+/** Casca do prédio: pedra cor de areia com arremate em ouro velho (Grupo NovaK). */
+export const EXTERIOR_WALL: WallStyle = { base: '#e3d8c4', trim: '#9c7f4a', pattern: 'brick', exterior: true };
 
 export interface ExteriorLayout {
   /** Limites da área desenhada (tiles). */
