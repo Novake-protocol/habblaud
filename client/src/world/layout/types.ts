@@ -2,7 +2,7 @@
 // que o render transforma em pixels e a simulação usa para caminhos e pontos de interesse.
 import type { Dir, FloorKind, FurnitureKind, WallStyle } from '../../art/api';
 
-export type AreaKind = 'reception' | 'restroom' | 'cafe' | 'lounge' | 'room' | 'corridor';
+export type AreaKind = 'reception' | 'restroom' | 'cafe' | 'lounge' | 'warroom' | 'library' | 'room' | 'corridor';
 
 /** Retângulo em tiles (coordenadas absolutas do mundo). */
 export interface TileRect {
@@ -76,6 +76,7 @@ export interface RugPatch {
 export type SpotKind =
   | 'desk' // lugar de trabalho (mesa + cadeira)
   | 'stool' // banqueta da mesa de reunião
+  | 'council' // cadeira da mesa da War Room (só membros do conselho)
   | 'nook' // poltrona/puff dentro da sala de projeto (lugar extra de trabalho, com notebook)
   | 'stand' // ponto em pé dentro da sala (trabalho sem mesa)
   | 'switch' // interruptor de luz

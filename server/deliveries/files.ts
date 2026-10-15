@@ -5,9 +5,12 @@
 // Node puro e sem dependências: também é importado pelo auxiliar do host (via tsx).
 import { existsSync, realpathSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { posix } from 'node:path';
 import type { DeliveryAttachmentKind } from '../../shared/types';
 import { tr } from '../../shared/i18n';
+
+// Caminhos POSIX em todo o módulo (pathProblem e insideKnownFolder trabalham com '/'); o fs do Node aceita '/' no Windows.
+const { dirname, join } = posix;
 
 export const DELIVERY_FILE_MAX_BYTES = 25 * 1024 * 1024;
 

@@ -22,14 +22,19 @@ const HAIR_FUN = ['#e47aa8', '#5b8fe0', '#8f6ad8', '#3fb3a0', '#e0584e', '#7cc45
 
 const EYES = ['#2b2236', '#2b2236', '#4a2f22', '#5a3b22', '#2f5f9e', '#3c7a52'] as const;
 
+// Roupas no clima do Grupo NovaK (blazer marfim, suéter violeta, broche dourado em todo blazer: character/render.ts),
+// com tons de apoio para os agentes continuarem distinguíveis uns dos outros.
 const TOP_COLORS = [
-  '#e2604f', '#4a86d8', '#4bab72', '#efb54a', '#8d66cf', '#36b0b0', '#e47aa8', '#3d4352', '#f1efe9',
-  '#8a96a3', '#2f4c7d', '#c9713f', '#76913f', '#e3d3b2', '#f29b72', '#5bc0de', '#b04a5a', '#f2d16b',
+  '#5b24d6', '#c6a45b', '#4bab72', '#e2604f', '#7a4fe0', '#36b0b0', '#e3d3b2', '#17132b', '#f1ead9',
+  '#8a96a3', '#2f4c7d', '#c9713f', '#76913f', '#3b1f8f', '#b04a6a', '#4a86d8', '#9a8fb8', '#e9d29d',
 ] as const;
-const SHIRT_COLORS = ['#f4f4f0', '#d3e3f4', '#f3d6de', '#dfe3e8', '#e9f1dc', '#fbf0d6'] as const;
-const TIE_COLORS = ['#c0392b', '#2f4c7d', '#7b2d44', '#2e7d4f', '#d9a42e', '#5b3a8c', '#3d4352'] as const;
-const JACKET_COLORS = ['#2f3b55', '#3d4352', '#6b4a35', '#55613b', '#262a33', '#b08a5e', '#7a2f3a', '#4a6a8a'] as const;
-const LIGHT_ACCENTS = ['#f4f4f0', '#e8e3d6', '#dfe7ef', '#f6e7c8', '#c9ced6'] as const;
+/** Suéter: violeta NovaK em primeiro lugar, com marfim, areia, tinta e ouro. */
+const SWEATER_COLORS = ['#5b24d6', '#6b3ae8', '#4a1cb3', '#f1ead9', '#e3d3b2', '#17132b', '#c6a45b'] as const;
+const SHIRT_COLORS = ['#fffdf8', '#e4dcf5', '#f3d6de', '#dfe3e8', '#e9f1dc', '#f6f2eb'] as const;
+const TIE_COLORS = ['#5b24d6', '#2f4c7d', '#7b2d44', '#2e7d4f', '#c6a45b', '#17132b', '#c0392b'] as const;
+/** Blazer: marfim e areia primeiro, depois tinta, violeta profundo e tons clássicos. */
+const JACKET_COLORS = ['#f1ead9', '#e3d3b2', '#17132b', '#3b1f8f', '#6b4a35', '#2f3b55', '#b08a5e', '#7a2f3a'] as const;
+const LIGHT_ACCENTS = ['#fffdf8', '#f6f2eb', '#e4dcf5', '#e9d29d', '#c9ced6'] as const;
 const BOTTOMS = [
   ['#3f5f8c', 5], ['#2e3e5e', 4], ['#2c2c35', 4], ['#b49c72', 2], ['#6d7480', 2], ['#6e4c38', 1.5],
   ['#5f6845', 1.2], ['#2c3655', 2], ['#7f9cc4', 1.5], ['#e2ded5', 0.5], ['#9b3b3b', 0.4],
@@ -47,7 +52,7 @@ const ACC_COLORS: Record<Accessory, readonly string[]> = {
   earrings: ['#f2c14e', '#d9dde3'],
   bow: ['#e2604f', '#e47aa8', '#efb54a', '#4a86d8', '#8d66cf'],
 };
-const LANYARDS = ['#f2b33d', '#e2604f', '#4a86d8', '#4bab72', '#8d66cf', '#36b0b0'] as const;
+const LANYARDS = ['#c6a45b', '#5b24d6', '#e2604f', '#4a86d8', '#4bab72', '#36b0b0'] as const;
 
 type Weights<T extends string> = Readonly<Record<T, number>>;
 
@@ -126,6 +131,10 @@ export function appearanceFromSeed(seed: number, opts: { look?: 'f' | 'm'; sub?:
       top = pick(JACKET_COLORS);
       topAccent = rnd() < 0.7 ? pick(LIGHT_ACCENTS) : pick(TOP_COLORS);
       break;
+    case 'sweater':
+      top = pick(SWEATER_COLORS);
+      topAccent = pick(TOP_COLORS);
+      break;
     case 'hoodie':
     case 'polo':
       top = pick(TOP_COLORS);
@@ -199,6 +208,8 @@ function topPalettes(style: TopStyle): { top: readonly string[]; topAccent: read
       return { top: SHIRT_COLORS, topAccent: TIE_COLORS };
     case 'jacket':
       return { top: JACKET_COLORS, topAccent: ACCENTS };
+    case 'sweater':
+      return { top: SWEATER_COLORS, topAccent: ACCENTS };
     default:
       return { top: TOP_COLORS, topAccent: ACCENTS };
   }

@@ -7,7 +7,7 @@
 // Cada transcript é relido só quando muda (mtime/tamanho). Os anexos ganham ids opacos: o navegador nunca vê caminhos.
 import { createHash } from 'node:crypto';
 import { statSync } from 'node:fs';
-import { isAbsolute, join, normalize } from 'node:path';
+import { posix } from 'node:path';
 import { tr } from '../../shared/i18n';
 import type { DeliveryAttachment, DeliveryInfo, Provider, RecentSession, TerminalEntry } from '../../shared/types';
 import type { TerminalParser } from '../sources/terminal';
@@ -132,11 +132,12 @@ export function linkedFiles(text: string, project?: string): string[] {
     }
     if (p.startsWith('file://')) p = p.slice(7);
     if (/^[a-z]+:/i.test(p)) return;
-    if (!isAbsolute(p)) {
+    // Caminhos dos transcripts são POSIX (pathProblem só aceita '/...'): o `path` nativo do Windows trocaria as barras.
+    if (!posix.isAbsolute(p)) {
       if (!project) return;
-      p = join(project, p);
+      p = posix.join(project, p);
     }
-    p = normalize(p);
+    p = posix.normalize(p);
     if (!pathProblem(p)) out.add(p);
   };
   for (const m of text.matchAll(LINK_RE)) add(m[1]);

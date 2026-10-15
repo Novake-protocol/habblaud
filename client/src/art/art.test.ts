@@ -681,6 +681,17 @@ describe('ícones e temas', () => {
     expect(roomTheme(THEME_COUNT)).toEqual(roomTheme(0));
     expect(roomTheme(-1)).toEqual(roomTheme(THEME_COUNT - 1));
   });
+
+  it('os temas usam só variantes de mesa e cadeira que existem (incluindo a cadeira violeta NovaK)', () => {
+    const chairs = FURNITURE.office_chair.variants ?? [];
+    const desks = FURNITURE.desk.variants ?? [];
+    for (let i = 0; i < THEME_COUNT; i++) {
+      expect(chairs).toContain(roomTheme(i).chairVariant);
+      expect(desks).toContain(roomTheme(i).deskVariant);
+    }
+    expect(chairs).toContain('violet');
+    expect(FURNITURE.office_chair_front.variants).toContain('violet');
+  });
 });
 
 describe('desenhos por quadro', () => {
@@ -891,10 +902,13 @@ describe('editor do personagem (arte)', () => {
   it('as cores da parte de cima e do acessório dependem do estilo', () => {
     const a = appearanceFromSeed(1);
     const shirt = editorOptions({ ...a, topStyle: 'shirt_tie' });
-    expect(shirt.top).toContain('#f4f4f0');
+    expect(shirt.top).toContain('#fffdf8');
     expect(shirt.top).not.toContain('#e2604f');
     expect(shirt.topAccent).toContain('#c0392b');
     expect(editorOptions({ ...a, topStyle: 'jacket' }).top).toContain('#2f3b55');
+    // Grupo NovaK: blazer marfim e suéter violeta são as primeiras opções
+    expect(editorOptions({ ...a, topStyle: 'jacket' }).top[0]).toBe('#f1ead9');
+    expect(editorOptions({ ...a, topStyle: 'sweater' }).top[0]).toBe('#5b24d6');
     expect(editorOptions({ ...a, accessory: 'sunglasses' }).accessoryColor).toEqual(['#22232b']);
     expect(editorOptions(a).eyes.length).toBe(new Set(editorOptions(a).eyes).size);
   });
@@ -911,9 +925,17 @@ describe('editor do personagem (arte)', () => {
 
   it('fitToOptions: depois de trocar o estilo, a cor fora da paleta nova cai na primeira dela', () => {
     const a = { ...appearanceFromSeed(1), topStyle: 'shirt_tie' as const, top: '#e2604f', topAccent: '#e2604f' };
-    expect(fitToOptions(a)).toMatchObject({ top: '#f4f4f0', topAccent: '#c0392b' });
+    expect(fitToOptions(a)).toMatchObject({ top: '#fffdf8', topAccent: '#5b24d6' });
     const ok = { ...appearanceFromSeed(1), topStyle: 'tshirt' as const, top: '#e2604f' };
     expect(fitToOptions(ok).top).toBe('#e2604f');
     expect(fitToOptions({ ...ok, accessory: 'sunglasses', accessoryColor: '#e2604f' }).accessoryColor).toBe('#22232b');
+  });
+
+  it('todo blazer tem o broche dourado do Grupo NovaK na lapela (de frente)', () => {
+    const base = appearanceFromSeed(1);
+    const front = (topStyle: Appearance['topStyle']) =>
+      renderCharacter({ appearance: { ...base, topStyle, top: '#17132b', topAccent: '#fffdf8' }, dir: 'down', pose: 'stand', frame: 0 }).buf;
+    expect(countColor(front('jacket'), '#c6a45b')).toBeGreaterThan(0);
+    expect(countColor(front('tshirt'), '#c6a45b')).toBe(0);
   });
 });

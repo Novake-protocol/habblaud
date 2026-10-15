@@ -7,7 +7,16 @@ import '@fontsource/pixelify-sans/400.css';
 import '@fontsource/pixelify-sans/500.css';
 import '@fontsource/pixelify-sans/600.css';
 import '@fontsource/pixelify-sans/700.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
+import '@fontsource/manrope/700.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/cormorant-garamond/700.css';
 import './styles.css';
+import './theme-novak.css';
+import { applyUiTheme } from './theme';
 
 import type { OfficeStore } from '../net/store';
 import type { Selection, WorldApi } from '../world/api';
@@ -84,6 +93,7 @@ export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi)
     updatePrefs(patch) {
       prefs = { ...prefs, ...patch };
       savePrefs(storage, prefs);
+      applyUiTheme(root, prefs.uiTheme);
       world.setOptions(worldOptionsFrom(prefs));
       invalidate();
     },
@@ -233,6 +243,7 @@ export function createUI(root: HTMLElement, store: OfficeStore, world: WorldApi)
   const scrim = h('div', { class: 'ui-scrim', attrs: { 'aria-hidden': 'true' }, on: { click: () => ctx.togglePanel('sidebar', false) } });
 
   root.classList.add('ui-root');
+  applyUiTheme(root, prefs.uiTheme);
   root.append(timelapse.vignette, topbar.el, sidebar.el, scrim, feed.el, drawer.el, terminal.el, pty.el, timelapse.el, timelapse.badge, toasts.el, banner.el, update.el, empty.el, tip.el, settings.el, history.el, deliveries.el, help.el, renamer.el, live, splash.el);
   area = new FreeArea(world, { root, topbar: topbar.el, sidebar: sidebar.el, drawer: drawer.el, feed: feed.el }, () => ({
     sidebar: panels.sidebar,

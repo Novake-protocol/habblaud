@@ -131,7 +131,8 @@ function paintTile(b: PixelBuf, kind: FloorKind, tx: number, ty: number, o: Floo
       break;
     }
     case 'grass': {
-      const g = ramp('#6cab57', 0.045);
+      // gramado de jardim bem cuidado (Grupo NovaK): verde-sálvia, menos saturado que o verde de parque
+      const g = ramp('#7d9f62', 0.045);
       const n = noise(tx * TILE, ty * TILE, 48, o.seed + 5);
       const base = mix(g.dk, g.lt, n);
       b.rect(0, 0, TILE, TILE, base);
@@ -153,19 +154,20 @@ function paintTile(b: PixelBuf, kind: FloorKind, tx: number, ty: number, o: Floo
       if (r(99) < 0.12) {
         const fx = 3 + Math.floor(r(100) * 10);
         const fy = 3 + Math.floor(r(101) * 10);
-        const fc = ['#ffffff', '#f7d154', '#f28fb0', '#b9a2f0'][Math.floor(r(102) * 4)];
+        const fc = ['#fffdf8', '#c6a45b', '#b9a2f0', '#7a4fe0'][Math.floor(r(102) * 4)];
         b.set(fx, fy, fc);
         b.set(fx + 1, fy, fc);
         b.set(fx, fy - 1, fc);
-        b.set(fx + 1, fy + 1, '#f2c14e');
+        b.set(fx + 1, fy + 1, '#e9d29d');
       }
       break;
     }
     case 'street': {
       const n = noise(tx * TILE, ty * TILE, 64, o.seed + 9);
-      const col = mix('#4b4f58', '#565a63', n);
+      // asfalto puxado para a tinta NovaK (#17132b)
+      const col = mix('#48434f', '#534e5b', n);
       b.rect(0, 0, TILE, TILE, col);
-      for (let i = 0; i < 14; i++) b.set(Math.floor(r(i) * TILE), Math.floor(r(i + 30) * TILE), r(i + 60) < 0.5 ? '#5f636c' : '#43464e');
+      for (let i = 0; i < 14; i++) b.set(Math.floor(r(i) * TILE), Math.floor(r(i + 30) * TILE), r(i + 60) < 0.5 ? '#5d5866' : '#3f3a48');
       break;
     }
     default:
@@ -212,12 +214,12 @@ function paintWood(b: PixelBuf, x0: number, y0: number, seed: number): void {
 }
 
 const LEVELS = 16;
-const CONCRETE: readonly RGBA[] = Array.from({ length: LEVELS }, (_, i) => rgba(mix('#d6d9dc', '#e4e6e8', i / (LEVELS - 1))));
+const CONCRETE: readonly RGBA[] = Array.from({ length: LEVELS }, (_, i) => rgba(mix('#ddd7cc', '#e9e4da', i / (LEVELS - 1))));
 const CONCRETE_EDGE: readonly RGBA[] = CONCRETE.map((c) => rgba(shade(`rgb(${c[0]},${c[1]},${c[2]})`, 0.02)));
-const CONCRETE_SEAM = rgba('#c8cdd2');
-const CONCRETE_SPECK = [rgba('#cdd1d5'), rgba('#eceeef')] as const;
+const CONCRETE_SEAM = rgba('#cdc4b4');
+const CONCRETE_SPECK = [rgba('#d3cbbd'), rgba('#f0ebe2')] as const;
 
-/** Cimento polido claro em placas de 2x2 tiles, com manchas suaves contínuas. */
+/** Cimento polido cor de areia em placas de 2x2 tiles, com manchas suaves contínuas. */
 function paintConcrete(b: PixelBuf, x0: number, y0: number, seed: number): void {
   for (let py = 0; py < CHUNK_PX; py++) {
     for (let px = 0; px < CHUNK_PX; px++) {
@@ -242,10 +244,10 @@ function paintConcrete(b: PixelBuf, x0: number, y0: number, seed: number): void 
 }
 
 const MARBLE: readonly RGBA[] = Array.from({ length: LEVELS }, (_, i) => rgba(mix('#ebe8e3', '#f5f3f0', i / (LEVELS - 1))));
-const MARBLE_VEIN = [rgba('#e2e3e6'), rgba('#cfd2d7')] as const;
+const MARBLE_VEIN = [rgba('#e5ddcd'), rgba('#cdb98f')] as const;
 const MARBLE_SEAM = rgba('#d6d3ce');
 
-/** Mármore branco em placas de 2x2 tiles com veios cinza contínuos dentro da placa. */
+/** Mármore marfim em placas de 2x2 tiles com veios dourados contínuos dentro da placa. */
 function paintMarble(b: PixelBuf, x0: number, y0: number, seed: number): void {
   for (let py = 0; py < CHUNK_PX; py++) {
     for (let px = 0; px < CHUNK_PX; px++) {
@@ -267,9 +269,9 @@ function paintMarble(b: PixelBuf, x0: number, y0: number, seed: number): void {
   }
 }
 
-const WALK_TONES = ['#d3cdc2', '#cfc8bc', '#d8d2c8'] as const;
+const WALK_TONES = ['#ddd3c1', '#d8cdba', '#e3dacb'] as const;
 /** [tom][0 normal, 1 junta, 2 borda clara, 3 mancha]. */
-const WALK: readonly (readonly RGBA[])[] = WALK_TONES.map((t) => [t, '#b8b1a5', shade(t, 0.03), shade(t, -0.05)].map(rgba));
+const WALK: readonly (readonly RGBA[])[] = WALK_TONES.map((t) => [t, '#c0b39c', shade(t, 0.03), shade(t, -0.05)].map(rgba));
 
 /** Calçada de placas 16x8 em fileiras desencontradas. */
 function paintSidewalk(b: PixelBuf, x0: number, y0: number, seed: number): void {

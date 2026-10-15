@@ -1175,6 +1175,9 @@ function drawTorso(dc: Dc): void {
         b.set(13, y, t.lt);
         b.set(10, y + 1, t.lt);
         b.set(13, y + 1, t.base);
+        // broche dourado do Grupo NovaK na lapela (todo blazer tem)
+        b.set(14, y + 1, BROOCH);
+        b.set(14, y + 2, BROOCH_SHADE);
       } else {
         b.vline(11, y + 1, y + 5, t.dk);
         b.rect(9, y, 6, 1, t.lt);
@@ -1205,6 +1208,9 @@ function drawTorso(dc: Dc): void {
   }
   drawLanyard(dc);
 }
+
+const BROOCH = '#c6a45b';
+const BROOCH_SHADE = '#8c6a1f';
 
 function drawLanyard(dc: Dc): void {
   const col = dc.a.lanyard;

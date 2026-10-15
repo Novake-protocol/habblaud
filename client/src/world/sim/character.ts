@@ -69,6 +69,9 @@ export class Character {
   enterFrom: { x: number; y: number } | null = null;
   /** Sala lotada: tile em que trabalha em pé (sem lugar reservado). */
   standTile: { x: number; y: number } | null = null;
+  /** Conselho (/council): falas na fila para os balões e quando sai a próxima (ver sim/council.ts). */
+  councilSay: string[] = [];
+  councilNextAt = 0;
   /** Ritmo próprio da caminhada (±8%), para quem sai junto não andar em fila perfeita. */
   readonly speedK: number;
   /** Faixa lateral (px) ao andar: dois personagens no mesmo caminho não se sobrepõem. */

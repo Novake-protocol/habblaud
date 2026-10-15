@@ -1,23 +1,11 @@
 // Camadas de estado: splash de carregamento, escritório vazio e aviso de conexão perdida.
 import type { UiComponent, UiContext } from './context';
 import { h, prefersReducedMotion, setHidden, setText } from './dom';
-import { FALLBACK_MARK } from './icons';
 import { emptyOfficeHint } from './provider';
-import { wordmark } from './widgets';
 import { tr } from '../../../shared/i18n';
 
 /** Depois de quanto tempo sem conexão o aviso aparece. */
 const DISCONNECTED_BANNER_MS = 8_000;
-
-function brandMark(size: number): HTMLElement {
-  const mark = h('span', { class: 'ui-brand__mark' });
-  const img = h('img', { attrs: { src: '/assets/brand/logo-mark@4x.png', alt: '', width: size, height: size, draggable: 'false' } });
-  img.addEventListener('error', () => {
-    mark.innerHTML = FALLBACK_MARK;
-  });
-  mark.append(img);
-  return mark;
-}
 
 export class Splash implements UiComponent {
   readonly el: HTMLElement;
@@ -31,7 +19,8 @@ export class Splash implements UiComponent {
     this.el = h(
       'div',
       { class: 'ui-splash', role: 'status', attrs: { 'aria-live': 'polite' } },
-      h('div', { class: 'ui-splash__inner' }, brandMark(64), wordmark('ui-splash__name'), this.text, h('span', { class: 'ui-splash__bar' })),
+      // fork NovaK: o lockup do Grupo NovaK (theme-novak.css) no lugar do prédio e do logotipo em pixels
+      h('div', { class: 'ui-splash__inner' }, h('span', { class: 'ui-brand__lockup ui-splash__lockup', role: 'img', attrs: { 'aria-label': tr('Habblaud · Grupo NovaK') } }), this.text, h('span', { class: 'ui-splash__bar' })),
     );
   }
 

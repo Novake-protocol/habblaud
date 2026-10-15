@@ -1,0 +1,171 @@
+/* Identidade do Grupo NovaK sobre a interface do Habblaud (fork Novake-protocol/habblaud).
+   Fonte: apps/novakgroup-landing (marfim, tinta violeta, violeta, ouro; Cormorant Garamond + Manrope).
+   Tema claro "Casa NovaK" por padrão; "Noite orbital" com data-theme="dark" (ui/theme.ts).
+   Os tokens --rgb-* são canais "R G B" para usar com alfa: rgb(var(--rgb-tint) / .06). Ouro em texto só na versão
+   escura do tom (#8c6a1f no claro): o #c6a45b sobre marfim fica em ~2,4:1 e serve só para linhas e preenchimentos.
+   O terminal (conversa e terminal interativo) fica escuro nos dois temas, de propósito: a saída ANSI do Claude Code
+   e os diffs foram feitos para fundo escuro. Ele recebe os tokens da Noite orbital (ilha escura abaixo) e a noite NovaK
+   (--term-*) com fios dourados. Replay, estatísticas do dia e visualizador de entregas seguem o tema. */
+
+.ui-root {
+  --novak-ivory: #fffdf8;
+  --novak-sand: #f6f2eb;
+  --novak-ink: #17132b;
+  --novak-violet: #5b24d6;
+  --novak-gold: #c6a45b;
+  --novak-gold-text: #8c6a1f;
+  --novak-night: #0c0a16;
+
+  --ui-bg: rgba(255, 253, 248, 0.92);
+  --ui-bg-solid: rgba(255, 253, 248, 0.98);
+  --ui-bg-soft: rgba(23, 19, 43, 0.035);
+  --ui-bg-hover: rgba(23, 19, 43, 0.06);
+  --ui-line: rgba(23, 19, 43, 0.12);
+  --ui-line-strong: rgba(23, 19, 43, 0.22);
+  --ui-text: #17132b;
+  --ui-text-2: #3b3550;
+  --ui-text-strong: #17132b;
+  --ui-muted: #625d6b;
+  /* 5,2:1 sobre o marfim */
+  --ui-faint: #6b6577;
+  --ui-accent: #5b24d6;
+  --ui-accent-soft: rgba(91, 36, 214, 0.1);
+  --ui-accent-text: #4a1cb3;
+  --ui-violet-text: #5b24d6;
+  --ui-gold: var(--novak-gold-text);
+  --ui-primary: #5b24d6;
+  --ui-primary-hover: #4a1cb3;
+  --ui-panel: #fffdf8;
+  --ui-well: #f1ece2;
+  --ui-danger: #b3261e;
+  --ui-warn-text: #7a4b00;
+  --ui-ok-text: #17703f;
+  /* clareia (escuro) ou escurece (claro) o texto misturado com a cor de status */
+  --ui-mix: #17132b;
+
+  --st-working: #1f9d5c;
+  --st-waiting: #b07000;
+  --st-shell: #0f8a85;
+  --st-idle: #6b6577;
+  --st-done: #2f62d6;
+  --st-offline: #8a8494;
+  --lv-ok: #1f9d5c;
+  --lv-warn: #b07000;
+  --lv-crit: #c62828;
+
+  --rgb-tint: 23 19 43;
+  --rgb-shade: 120 96 52;
+  --rgb-shadow: 23 19 43;
+  --rgb-accent: 91 36 214;
+  --rgb-waiting: 176 112 0;
+  --rgb-crit: 198 40 40;
+  --rgb-line: 23 19 43;
+  --rgb-ok: 31 157 92;
+  --rgb-violet: 91 36 214;
+  --rgb-panel: 255 253 248;
+  --rgb-primary: 91 36 214;
+  --rgb-gold: 198 164 91;
+  /* cinza de contexto do "ocioso" nos gráficos do Meu dia (3:1 ou mais sobre o painel) */
+  --day-idle-tone: #6b6577;
+
+  /* Terminal: noite NovaK (#0c0a16) com texto marfim e fios em ouro; igual nos dois temas. */
+  --term-bg: rgba(16, 13, 28, 0.97);
+  --term-well: #0c0a16;
+  --term-raise: rgba(255, 253, 248, 0.035);
+  --term-fg: #e4deec;
+  --term-dim: #9d95ae;
+  --term-soft: #bdb5cb;
+  --term-strong: #fffdf8;
+  --term-seg: rgba(198, 164, 91, 0.42);
+  --term-focus: rgba(216, 184, 122, 0.6);
+  --term-scroll: rgba(208, 196, 230, 0.24);
+  --term-select: #3a2c66;
+  --term-cursor: #d8b87a;
+
+  --font-px: 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: light;
+}
+
+/* Noite orbital; também a ilha escura do terminal nos dois temas. */
+.ui-root[data-theme='dark'],
+.ui-root .ui-term {
+  --ui-bg: rgba(20, 16, 31, 0.9);
+  --ui-bg-solid: rgba(20, 16, 31, 0.97);
+  --ui-bg-soft: rgba(255, 253, 248, 0.04);
+  --ui-bg-hover: rgba(255, 253, 248, 0.07);
+  --ui-line: rgba(198, 164, 91, 0.16);
+  --ui-line-strong: rgba(198, 164, 91, 0.3);
+  --ui-text: #fffdf8;
+  --ui-text-2: #d0cad8;
+  --ui-text-strong: #fffdf8;
+  --ui-muted: #d0cad8;
+  --ui-faint: #a9a2b6;
+  --ui-accent: #d8b87a;
+  --ui-accent-soft: rgba(216, 184, 122, 0.14);
+  --ui-accent-text: #e9d29d;
+  --ui-violet-text: #d3c2ff;
+  --ui-gold: #e9d29d;
+  --ui-primary: #6b3ae8;
+  --ui-primary-hover: #8259f0;
+  --ui-panel: #14101f;
+  --ui-well: #0c0a16;
+  --ui-danger: #ff8a8a;
+  --ui-warn-text: #ffcf8a;
+  --ui-ok-text: #b9f2d2;
+  --ui-mix: #fff;
+
+  --st-working: #4fd18b;
+  --st-waiting: #ffb547;
+  --st-shell: #3cd8d2;
+  --st-idle: #a9a2b6;
+  --st-done: #8fa8ff;
+  --st-offline: #6b6577;
+  --lv-ok: #4fd18b;
+  --lv-warn: #ffb547;
+  --lv-crit: #ff6b6b;
+
+  --rgb-tint: 255 253 248;
+  --rgb-shade: 0 0 0;
+  --rgb-shadow: 5 4 12;
+  --rgb-accent: 216 184 122;
+  --rgb-waiting: 255 181 71;
+  --rgb-crit: 255 107 107;
+  --rgb-line: 208 196 230;
+  --rgb-ok: 79 209 139;
+  --rgb-violet: 170 140 255;
+  --rgb-panel: 20 16 31;
+  --rgb-primary: 107 58 232;
+  --rgb-gold: 198 164 91;
+  --day-idle-tone: #8a8494;
+
+  color-scheme: dark;
+}
+
+/* Títulos de painel em serifa: a Cormorant é mais estreita e leve que a Pixelify, então sobe de tamanho e peso. */
+.ui-root :is(h2, h3) {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Lockup oficial do Grupo NovaK (PNG 709 × 120; docs/novak/brand-lockup-provenance.md): tinta preta no claro e
+   branca na Noite orbital, trocadas só por CSS. */
+.ui-brand__lockup {
+  display: block;
+  flex: 0 0 auto;
+  height: 22px;
+  aspect-ratio: 709 / 120;
+  background: url('/assets/brand/novak/grupo-novak-lockup-preto.png') left center / contain no-repeat;
+}
+
+.ui-root[data-theme='dark'] .ui-brand__lockup {
+  background-image: url('/assets/brand/novak/grupo-novak-lockup-branco.png');
+}
+
+.ui-splash__lockup {
+  height: 40px;
+  margin-bottom: 6px;
+}

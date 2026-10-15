@@ -9,6 +9,23 @@ import { tr } from '../../../shared/i18n';
 
 const RESIZE_DEBOUNCE_MS = 120;
 
+/** Cores do xterm a partir dos tokens --term-* (ui/theme-novak.css): noite NovaK, cursor em ouro. O terminal fica
+ *  escuro nos dois temas; os valores de reserva são os mesmos tokens, para quando a folha ainda não carregou. */
+const TERM_FALLBACK = { background: '#0c0a16', foreground: '#e4deec', cursor: '#d8b87a', selectionBackground: '#3a2c66' };
+
+function xtermTheme(): typeof TERM_FALLBACK {
+  const root = typeof document === 'undefined' ? null : document.querySelector('.ui-root');
+  if (!root) return TERM_FALLBACK;
+  const css = getComputedStyle(root);
+  const v = (name: string, fallback: string): string => css.getPropertyValue(name).trim() || fallback;
+  return {
+    background: v('--term-well', TERM_FALLBACK.background),
+    foreground: v('--term-fg', TERM_FALLBACK.foreground),
+    cursor: v('--term-cursor', TERM_FALLBACK.cursor),
+    selectionBackground: v('--term-select', TERM_FALLBACK.selectionBackground),
+  };
+}
+
 export class PtyPane {
   readonly el: HTMLElement;
   private term: Terminal;
@@ -30,7 +47,7 @@ export class PtyPane {
       fontFamily: "'Cascadia Mono', Consolas, Menlo, monospace",
       fontSize: 13,
       scrollback: 5000,
-      theme: { background: '#0a0c12', foreground: '#d5dceb', cursor: '#ffb547', selectionBackground: '#3a4a6b' },
+      theme: xtermTheme(),
     });
     this.fit = new FitAddon();
     this.term.loadAddon(this.fit);

@@ -5,6 +5,7 @@ import { BLOCKED, FREE, SEAT, WalkGrid } from '../path/grid';
 import { furnitureBlocks, furnitureIsSeat } from './builder';
 import { layoutCafe, layoutLounge, layoutReception, layoutRestroom } from './core';
 import { layoutCorridor } from './corridor';
+import { layoutLibrary, layoutWarRoom } from './warroom';
 import { buildingRect } from './geometry';
 import type { AreaLayout, SpotDef, TileRect } from './types';
 
@@ -22,7 +23,7 @@ let coreCache: AreaLayout[] | null = null;
 
 /** Áreas fixas do núcleo (calculadas uma vez). */
 export function coreAreas(): AreaLayout[] {
-  return (coreCache ??= [layoutReception(), layoutRestroom(), layoutCafe(), layoutLounge()]);
+  return (coreCache ??= [layoutReception(), layoutRestroom(), layoutCafe(), layoutLounge(), layoutWarRoom(), layoutLibrary()]);
 }
 
 /** Marca na grade as células caminháveis de uma área, os bloqueios e os assentos. */

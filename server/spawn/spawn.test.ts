@@ -1,6 +1,6 @@
 import { chmodSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   cliArgs,
@@ -162,7 +162,15 @@ describe('novo agente em segundo plano (claude --bg)', () => {
     expect(cliArgs({ folder: '/p', prompt: '  ' })).toEqual(['--bg', '-n', 'Habblaud']);
   });
 
-  it('createCliRunner roda o binário na pasta, sem shell, e lê o id; erro vira a 1ª linha', async () => {
+  it('Windows: acha o claude.cmd pelo PATHEXT num PATH separado por ;', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'hb-spawn-win-'));
+    writeFileSync(join(dir, 'claude.cmd'), '@echo off\r\n');
+    expect(runnableClaudeBin({ PATH: `C:\\nao\\existe;${dir}`, PATHEXT: '.COM;.CMD' }, 'win32')).toBe(resolve(dir, 'claude.cmd'));
+    expect(runnableClaudeBin({ PATH: dir, PATHEXT: '.COM' }, 'win32')).toBeUndefined();
+  });
+
+  // O binário falso é um script #!/bin/sh e o PATH usa ':'; a busca do Windows (.cmd, ';') está no teste acima.
+  it.skipIf(process.platform === 'win32')('createCliRunner roda o binário na pasta, sem shell, e lê o id; erro vira a 1ª linha', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'hb-spawn-'));
     const bin = join(dir, 'claude');
     writeFileSync(

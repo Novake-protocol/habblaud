@@ -62,9 +62,10 @@ export function reconnectDelay(attempt: number): number {
 
 /**
  * Opções do simulador a partir da query string (?speed=2&sessions=6). `sessions=0` vale: escritório vazio. Para
- * capturas de tela: `seed=N` repete o mesmo escritório e `noquota=1` deixa a conta do Codex "sem cota".
+ * capturas de tela: `seed=N` repete o mesmo escritório, `noquota=1` deixa a conta do Codex "sem cota" e `council=1` traz o
+ * conselho (/council) à War Room logo na abertura.
  */
-export function mockOptionsFrom(search: string): { speed: number; sessions: number; seed?: number; codexNoQuota?: boolean } {
+export function mockOptionsFrom(search: string): { speed: number; sessions: number; seed?: number; codexNoQuota?: boolean; council?: boolean } {
   const params = new URLSearchParams(search);
   const num = (name: string): number | null => {
     const raw = params.get(name);
@@ -80,6 +81,7 @@ export function mockOptionsFrom(search: string): { speed: number; sessions: numb
     sessions: sessions !== null && sessions >= 0 ? Math.min(Math.floor(sessions), 40) : 4,
     ...(seed !== null && seed >= 0 ? { seed: Math.floor(seed) } : {}),
     ...(params.get('noquota') === '1' ? { codexNoQuota: true } : {}),
+    ...(params.get('council') === '1' ? { council: true } : {}),
   };
 }
 

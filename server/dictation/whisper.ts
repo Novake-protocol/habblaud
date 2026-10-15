@@ -8,7 +8,7 @@
 import { execFile } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
-import { delimiter, join } from 'node:path';
+import { join, posix, win32 } from 'node:path';
 import { tr } from '../../shared/i18n';
 
 export const TRANSCRIBE_TIMEOUT_MS = 120_000;
@@ -32,22 +32,38 @@ export interface Transcript {
 
 export type Transcriber = (audio: Buffer, type: string) => Promise<Transcript>;
 
-function onPath(name: string, env: NodeJS.ProcessEnv): string | undefined {
-  for (const dir of (env.PATH ?? '').split(delimiter)) {
+/** Procura `name` no PATH. No Windows: separador ';' e as extensões de executável (whisper-cli.exe, ffmpeg.exe). */
+function onPath(name: string, env: NodeJS.ProcessEnv, exists: (p: string) => boolean, platform: NodeJS.Platform): string | undefined {
+  const win = platform === 'win32';
+  const exts = win ? ['.exe', '.cmd', '.bat', ''] : [''];
+  const pathJoin = win ? win32.join : posix.join;
+  for (const dir of (env.PATH ?? env.Path ?? '').split(win ? ';' : ':')) {
     if (!dir) continue;
-    const p = join(dir, name);
-    if (existsSync(p)) return p;
+    for (const ext of exts) {
+      const p = pathJoin(dir, name + ext);
+      if (exists(p)) return p;
+    }
   }
   return undefined;
 }
 
+/** Como instalar o que falta, no jeito de cada sistema. */
+function installHint(what: 'whisper-cli' | 'ffmpeg', platform: NodeJS.Platform): string {
+  if (platform === 'win32') return what === 'ffmpeg' ? 'ffmpeg (winget install Gyan.FFmpeg)' : tr('whisper-cli (baixe o whisper.cpp para Windows e ponha no PATH, ou use HABBLAUD_WHISPER_BIN)');
+  return what === 'ffmpeg' ? 'ffmpeg (brew install ffmpeg)' : 'whisper-cli (brew install whisper-cpp)';
+}
+
 /** Acha o whisper-cli, o ffmpeg e o melhor modelo multilíngue; undefined (com o motivo) se faltar algum. */
-export function findWhisper(env: NodeJS.ProcessEnv = process.env, exists: (p: string) => boolean = existsSync): WhisperSetup | { missing: string } {
-  const home = env.HOME || homedir();
-  const bin = env.HABBLAUD_WHISPER_BIN?.trim() || ['/opt/homebrew/bin/whisper-cli', '/usr/local/bin/whisper-cli'].find(exists) || onPath('whisper-cli', env);
-  if (!bin || !exists(bin)) return { missing: 'whisper-cli (brew install whisper-cpp)' };
-  const ffmpeg = env.HABBLAUD_FFMPEG_BIN?.trim() || ['/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg'].find(exists) || onPath('ffmpeg', env);
-  if (!ffmpeg || !exists(ffmpeg)) return { missing: 'ffmpeg (brew install ffmpeg)' };
+export function findWhisper(
+  env: NodeJS.ProcessEnv = process.env,
+  exists: (p: string) => boolean = existsSync,
+  platform: NodeJS.Platform = process.platform,
+): WhisperSetup | { missing: string } {
+  const home = env.HOME || env.USERPROFILE || homedir();
+  const bin = env.HABBLAUD_WHISPER_BIN?.trim() || ['/opt/homebrew/bin/whisper-cli', '/usr/local/bin/whisper-cli'].find(exists) || onPath('whisper-cli', env, exists, platform);
+  if (!bin || !exists(bin)) return { missing: installHint('whisper-cli', platform) };
+  const ffmpeg = env.HABBLAUD_FFMPEG_BIN?.trim() || ['/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg'].find(exists) || onPath('ffmpeg', env, exists, platform);
+  if (!ffmpeg || !exists(ffmpeg)) return { missing: installHint('ffmpeg', platform) };
   const dirs = [join(home, '.local', 'share', 'whisper'), join(home, '.whisper'), '/opt/homebrew/share/whisper-cpp', '/usr/local/share/whisper-cpp'];
   const model =
     env.HABBLAUD_WHISPER_MODEL?.trim() ||

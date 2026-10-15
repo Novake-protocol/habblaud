@@ -11,16 +11,6 @@
       "w": 128,
       "h": 128
     },
-    "signage": {
-      "file": "brand/signage.png",
-      "w": 64,
-      "h": 16
-    },
-    "signageLarge": {
-      "file": "brand/signage@4x.png",
-      "w": 256,
-      "h": 64
-    },
     "favicon16": "brand/favicon-16.png",
     "favicon32": "brand/favicon-32.png",
     "appleTouch": "brand/apple-touch-icon.png",

@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#12151d" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f6f2eb" />
     <meta name="description" content="Escritório virtual em pixel art que mostra, em tempo real, o que seus agentes do Claude Code estão fazendo." />
     <title>Habblaud</title>
     <!-- Prévia ao compartilhar o link (Open Graph / Twitter). -->
@@ -32,7 +32,8 @@
     <meta name="apple-mobile-web-app-title" content="Habblaud" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #12151d; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #f6f2eb; }
+      html[data-theme='dark'], html[data-theme='dark'] body { background: #0c0a16; }
       #world { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; image-rendering: pixelated; }
       #ui { position: fixed; inset: 0; pointer-events: none; }
       #ui > * { pointer-events: auto; }

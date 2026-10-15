@@ -29,8 +29,14 @@ export interface StoredCharacter {
 
 const MAX_OWNER_LENGTH = 200;
 
+/**
+ * 2: o pool passou a ser o dos agentes do NovaK. Os nomes sorteados de um arquivo da versão 1 (nomes de pessoas) são
+ * descartados uma vez ao carregar; os personagens escolhidos no editor (`rooms`) continuam.
+ */
+const NAMES_VERSION = 2;
+
 interface NamesFile {
-  version: 1;
+  version: number;
   names: Record<string, StoredName>;
   rooms?: Record<string, StoredCharacter>;
 }
@@ -75,7 +81,8 @@ export class NameStore {
     if (!this.file) return;
     try {
       const j = JSON.parse(readFileSync(this.file, 'utf8')) as Partial<NamesFile>;
-      for (const [key, v] of Object.entries(j.names ?? {})) {
+      const names = (j.version ?? 1) >= NAMES_VERSION ? j.names : undefined;
+      for (const [key, v] of Object.entries(names ?? {})) {
         if (v && typeof v.name === 'string' && (v.look === 'f' || v.look === 'm')) {
           this.names.set(key, { name: v.name, look: v.look, at: typeof v.at === 'number' ? v.at : 0 });
         }
@@ -169,7 +176,7 @@ export class NameStore {
     const rooms = fresh(this.rooms);
     this.names = new Map(kept);
     this.rooms = new Map(rooms);
-    const data: NamesFile = { version: 1, names: Object.fromEntries(kept) };
+    const data: NamesFile = { version: NAMES_VERSION, names: Object.fromEntries(kept) };
     if (rooms.length) data.rooms = Object.fromEntries(rooms);
     try {
       mkdirSync(dirname(this.file), { recursive: true });

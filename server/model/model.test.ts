@@ -113,7 +113,7 @@ describe('NameStore: personagem de cada sala', () => {
       writeFileSync(
         file,
         JSON.stringify({
-          version: 1,
+          version: 2,
           names,
           rooms: {
             '/ok': { name: ' Ana   Paula ', look: 'f', seed: 1, at: NOW },
@@ -132,12 +132,36 @@ describe('NameStore: personagem de cada sala', () => {
       for (const r of ['/cor', '/seed', '/look', '/nome', '/lixo']) expect(s.character(r)).toBeUndefined();
 
       for (const rooms of ['x', [1], null]) {
-        writeFileSync(file, JSON.stringify({ version: 1, names, rooms }));
+        writeFileSync(file, JSON.stringify({ version: 2, names, rooms }));
         const t = new NameStore(file, { now: () => NOW });
         t.load();
         expect(t.assign('s1', new Set()).name).toBe('Marina');
         expect(t.reservedNames().size).toBe(0);
       }
+    } finally {
+      tmp.cleanup();
+    }
+  });
+
+  it('names.json da versão 1 (nomes de pessoas): os nomes sorteados saem uma vez, os personagens das salas ficam', () => {
+    const tmp = tempDir();
+    try {
+      const file = join(tmp.dir, 'names.json');
+      writeFileSync(
+        file,
+        JSON.stringify({
+          version: 1,
+          names: { s1: { name: 'Marina', look: 'f', at: NOW } },
+          rooms: { '/ok': { name: 'Zé Backend', look: 'm', seed: 1, at: NOW } },
+        }),
+      );
+      const s = new NameStore(file, { now: () => NOW });
+      s.load();
+      const drawn = s.assign('s1', new Set()).name;
+      expect(NAME_POOL.some((p) => p.name === drawn)).toBe(true);
+      expect(s.character('/ok')?.name).toBe('Zé Backend');
+      s.flush();
+      expect(JSON.parse(readFileSync(file, 'utf8'))).toMatchObject({ version: 2, names: { s1: { name: drawn } } });
     } finally {
       tmp.cleanup();
     }
@@ -498,6 +522,42 @@ describe('Office', () => {
   });
 });
 
+describe('Office: conselho (/council)', () => {
+  it('conselheiro tem nome, visual e semente fixos e não entra no names.json', () => {
+    const names = new NameStore(null);
+    const { office, now } = makeOffice(names);
+    office.addMain({ id: 'acc:1', account: 'acc', sessionId: 's1', cwd: '/p/a', role: 'x', startedAt: now(), status: 'working' });
+    office.addSub({ id: 's1:a', parentId: 'acc:1', sessionId: 's1', role: 'general-purpose', council: 'socrates', background: false, startedAt: now() });
+    const a = office.get('s1:a')!;
+    expect(a).toMatchObject({ name: 'Sócrates', look: 'm', council: 'socrates', seed: hash32('council:socrates') });
+    expect(a.parts?.facialHair).toBe('beard');
+    expect((names as unknown as { names: Map<string, unknown> }).names.has('s1:a')).toBe(false);
+  });
+
+  it('nova rodada do mesmo membro tira o da rodada anterior que já terminou', () => {
+    const { office, now } = makeOffice();
+    office.addMain({ id: 'acc:1', account: 'acc', sessionId: 's1', cwd: '/p/a', role: 'x', startedAt: now(), status: 'working' });
+    office.addSub({ id: 's1:r1', parentId: 'acc:1', sessionId: 's1', role: 'general-purpose', council: 'feynman', background: false, startedAt: now() });
+    office.addSub({ id: 's1:other', parentId: 'acc:1', sessionId: 's1', role: 'general-purpose', council: 'ada', background: false, startedAt: now() });
+    office.completeSub('s1:r1');
+    office.completeSub('s1:other');
+    office.addSub({ id: 's1:r2', parentId: 'acc:1', sessionId: 's1', role: 'general-purpose', council: 'feynman', background: false, startedAt: now() });
+    office.tick();
+    expect(office.has('s1:r1')).toBe(false);
+    expect(office.has('s1:other')).toBe(true);
+    expect(office.get('s1:r2')).toMatchObject({ name: 'Feynman', status: 'working' });
+  });
+
+  it('subagente comum segue com nome sorteado', () => {
+    const { office, now } = makeOffice();
+    office.addMain({ id: 'acc:1', account: 'acc', sessionId: 's1', cwd: '/p/a', role: 'x', startedAt: now(), status: 'working' });
+    office.addSub({ id: 's1:x', parentId: 'acc:1', sessionId: 's1', role: 'Explore', background: false, startedAt: now() });
+    const x = office.get('s1:x')!;
+    expect(x.council).toBeUndefined();
+    expect(NAME_POOL.some((p) => p.name === x.name)).toBe(true);
+  });
+});
+
 describe('Office: personagem do projeto', () => {
   const main = (id: string, sessionId: string, cwd: string, now: number) =>
     ({ id, account: 'acc', sessionId, cwd, role: 'Agente principal', startedAt: now, status: 'working' }) as const;
@@ -701,7 +761,7 @@ describe('Office: personagem do projeto', () => {
         writeFileSync(
           file,
           JSON.stringify({
-            version: 1,
+            version: 2,
             names: { s2: { name: 'Marina', look: 'f', at } },
             rooms: { '/p/api': { name: 'Zé Backend', look: 'm', seed: 42, at } },
           }),
