@@ -27,6 +27,9 @@ import { Hub } from './sse';
 import { hashPassword, parsePasswordHash } from '../remote/password';
 import { SpawnService } from '../spawn/spawn';
 
+// Permissões POSIX (600/700) não existem no NTFS: no Windows o acesso fica com as ACLs da pasta do usuário.
+const POSIX_MODES = process.platform !== 'win32';
+
 setQuiet(true);
 
 const SECRET = Buffer.alloc(32, 7);
@@ -55,7 +58,7 @@ describe('parseRemoteConfig', () => {
   it('liga com padrões: porta 4748, só permissões, certificado da pasta padrão', () => {
     const { config } = parseRemoteConfig({ ...base, HOME: '/h' }, false, TLS_FILES);
     expect(config).toMatchObject({ port: 4748, host: '0.0.0.0', user: 'ana' });
-    expect(config?.tls?.certFile).toBe('/h/.habblaud/remote-tls/server/server.crt');
+    expect(config?.tls?.certFile).toBe(join('/h', '.habblaud', 'remote-tls', 'server', 'server.crt'));
     expect([...config!.allow]).toEqual(['permissions']);
   });
   it('no Docker ignora porta e host (o container escuta sempre em 0.0.0.0:4748) e lê o certificado de /remote-tls', () => {
@@ -99,7 +102,7 @@ describe('RemoteSessions', () => {
     sessions.revoke('lixo');
     expect(sessions.verify(phone)).toBe(false);
     expect(sessions.verify(other)).toBe(true);
-    expect(statSync(file).mode & 0o777).toBe(0o600);
+    if (POSIX_MODES) expect(statSync(file).mode & 0o777).toBe(0o600);
     const restarted = new RemoteSessions(SECRET, CFG, () => now, file);
     expect(restarted.verify(phone)).toBe(false);
     expect(restarted.verify(other)).toBe(true);
@@ -110,7 +113,7 @@ describe('RemoteSessions', () => {
     const tmp = tempDir();
     const file = join(tmp.dir, 'data', 'remote-secret');
     const a = loadSecret(file);
-    expect(statSync(file).mode & 0o777).toBe(0o600);
+    if (POSIX_MODES) expect(statSync(file).mode & 0o777).toBe(0o600);
     expect(readFileSync(file, 'utf8')).toBe(a.toString('hex'));
     expect(loadSecret(file).equals(a)).toBe(true);
     tmp.cleanup();

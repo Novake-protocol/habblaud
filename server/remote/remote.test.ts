@@ -16,6 +16,9 @@ import { addToList, readEnvValue, updateEnv } from './envfile';
 import { hashPassword, parsePasswordHash, verifyPassword } from './password';
 import { caCovers, caFingerprint, certTargets, ensureServerCert, isPrivateIpv4, isValidDomain, isValidName, lanAddresses, remoteTargets, serverCertStatus, tlsPaths } from './tls';
 
+// Permissões POSIX (600/700) não existem no NTFS: no Windows o acesso fica com as ACLs da pasta do usuário.
+const POSIX_MODES = process.platform !== 'win32';
+
 setQuiet(true);
 
 const HAS_OPENSSL = spawnSync('openssl', ['version']).status === 0;
@@ -128,8 +131,10 @@ describe.skipIf(!HAS_OPENSSL)('certificados (openssl)', () => {
     const paths = tlsPaths(join(tmp.dir, 'remote-tls'));
     const r = ensureServerCert(paths, targets);
     expect(r).toMatchObject({ createdCa: true, issued: true });
-    expect(statSync(paths.caKey).mode & 0o777).toBe(0o600);
-    expect(statSync(paths.base).mode & 0o777).toBe(0o700);
+    if (POSIX_MODES) {
+      expect(statSync(paths.caKey).mode & 0o777).toBe(0o600);
+      expect(statSync(paths.base).mode & 0o777).toBe(0o700);
+    }
     const cert = new X509Certificate(readFileSync(paths.serverCert));
     const ca = new X509Certificate(readFileSync(paths.caCert));
     expect(cert.verify(ca.publicKey)).toBe(true);
